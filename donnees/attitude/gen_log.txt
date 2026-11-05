@@ -1,0 +1,17 @@
+essai   1 / 150  (amp 0.0049 0.0055, |theta| max 0.25, |phi| max 0.26 rad, z dans [0.480, 0.592], |x| max 117.2 m)  6 s
+essai  10 / 150  (amp 0.0028 0.0024, |theta| max 0.13, |phi| max 0.12 rad, z dans [0.482, 0.593], |x| max 104.9 m)  10 s
+essai  20 / 150  (amp 0.0018 0.0052, |theta| max 0.08, |phi| max 0.27 rad, z dans [0.479, 0.601], |x| max 109.3 m)  14 s
+essai  30 / 150  (amp 0.0030 0.0036, |theta| max 0.14, |phi| max 0.18 rad, z dans [0.483, 0.593], |x| max 196.4 m)  18 s
+essai  40 / 150  (amp 0.0021 0.0006, |theta| max 0.11, |phi| max 0.04 rad, z dans [0.484, 0.583], |x| max 148.5 m)  22 s
+essai  50 / 150  (amp 0.0056 0.0012, |theta| max 0.28, |phi| max 0.07 rad, z dans [0.479, 0.596], |x| max 327.9 m)  26 s
+essai  60 / 150  (amp 0.0046 0.0039, |theta| max 0.23, |phi| max 0.21 rad, z dans [0.478, 0.596], |x| max 130.9 m)  30 s
+essai  70 / 150  (amp 0.0008 0.0016, |theta| max 0.04, |phi| max 0.08 rad, z dans [0.485, 0.594], |x| max 67.7 m)  33 s
+essai  80 / 150  (amp 0.0059 0.0025, |theta| max 0.27, |phi| max 0.13 rad, z dans [0.469, 0.587], |x| max 78.0 m)  37 s
+essai  90 / 150  (amp 0.0051 0.0051, |theta| max 0.22, |phi| max 0.21 rad, z dans [0.476, 0.585], |x| max 77.6 m)  41 s
+essai 100 / 150  (amp 0.0028 0.0052, |theta| max 0.13, |phi| max 0.26 rad, z dans [0.474, 0.604], |x| max 265.1 m)  45 s
+essai 110 / 150  (amp 0.0011 0.0031, |theta| max 0.05, |phi| max 0.14 rad, z dans [0.484, 0.597], |x| max 25.8 m)  49 s
+essai 120 / 150  (amp 0.0030 0.0011, |theta| max 0.15, |phi| max 0.06 rad, z dans [0.485, 0.590], |x| max 327.1 m)  53 s
+essai 130 / 150  (amp 0.0025 0.0010, |theta| max 0.11, |phi| max 0.06 rad, z dans [0.487, 0.595], |x| max 131.0 m)  57 s
+essai 140 / 150  (amp 0.0042 0.0022, |theta| max 0.20, |phi| max 0.11 rad, z dans [0.485, 0.596], |x| max 276.2 m)  60 s
+essai 150 / 150  (amp 0.0024 0.0026, |theta| max 0.09, |phi| max 0.14 rad, z dans [0.483, 0.596], |x| max 266.9 m)  64 s
+EI_RL\Matlab files\generation_attitude\..\..\donnees\attitude\donnees_attitude.mat ‚crit : 150 essais x 1200 pas, 65 s

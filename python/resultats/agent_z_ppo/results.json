@@ -1,0 +1,86 @@
+{
+  "reglages": {
+    "steps": 400000,
+    "eval_freq": 100000,
+    "seed": 0,
+    "n_envs": 16,
+    "ppo": {
+      "n_steps": 256,
+      "batch_size": 512,
+      "n_epochs": 10,
+      "learning_rate": 0.0003,
+      "gamma": 0.99,
+      "gae_lambda": 0.95,
+      "clip_range": 0.2,
+      "ent_coef": 0.0,
+      "policy_kwargs": {
+        "net_arch": [
+          64,
+          64
+        ],
+        "log_std_init": -1.0
+      }
+    },
+    "bruit": {
+      "sigma_z": 0.005,
+      "sigma_vz": 0.005,
+      "sigma_az": 0.005
+    },
+    "z_export": 0.5
+  },
+  "duree_min": 1.5468404134114584,
+  "historique": [
+    {
+      "rendement": 178.9822629560722,
+      "rmse_lisse": 0.07099221823684992,
+      "rmse_brut": 0.14978116340678188,
+      "depassement": 0.02661226754363618,
+      "erreur_finale": 0.003988267860570737,
+      "agitation_u": 0.011060564878897453,
+      "pas": 100000
+    },
+    {
+      "rendement": 186.45224255963208,
+      "rmse_lisse": 0.04396868105338107,
+      "rmse_brut": 0.12716148780662048,
+      "depassement": 0.0111642539026732,
+      "erreur_finale": 0.0018668203183976342,
+      "agitation_u": 0.012195848018380267,
+      "pas": 200000
+    },
+    {
+      "rendement": 186.15452952044274,
+      "rmse_lisse": 0.04197654021113177,
+      "rmse_brut": 0.12413519970625693,
+      "depassement": 0.010507478925426913,
+      "erreur_finale": 0.002322587506103936,
+      "agitation_u": 0.012025591543870954,
+      "pas": 300000
+    },
+    {
+      "rendement": 186.9538717253456,
+      "rmse_lisse": 0.042009237834039696,
+      "rmse_brut": 0.12471886066267124,
+      "depassement": 0.009356505682432525,
+      "erreur_finale": 0.0008294634518306553,
+      "agitation_u": 0.011665804197440793,
+      "pas": 400000
+    }
+  ],
+  "agent_final": {
+    "rendement": 186.9538717253456,
+    "rmse_lisse": 0.042009237834039696,
+    "rmse_brut": 0.12471886066267124,
+    "depassement": 0.009356505682432525,
+    "erreur_finale": 0.0008294634518306553,
+    "agitation_u": 0.011665804197440793
+  },
+  "lqi": {
+    "rendement": 148.85695824687224,
+    "rmse_lisse": 0.08505191439045204,
+    "rmse_brut": 0.15963182209407117,
+    "depassement": 0.11868402804590775,
+    "erreur_finale": 0.00143952518944092,
+    "agitation_u": 0.021659299658892343
+  }
+}

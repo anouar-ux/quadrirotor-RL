@@ -1,0 +1,133 @@
+{
+  "agents": {
+    "z": "python/resultats/agent_z_ppo/best_model",
+    "psi": "python/resultats/agent_psi_ppo/best_model",
+    "x": "python/resultats/agent_x_ppo"
+  },
+  "z": {
+    "agent PPO": {
+      "rmse": 0.02677458642798027,
+      "e_max": 0.05355925136079065,
+      "retard_s": 0.1,
+      "bande_passante_hz": 2.421875,
+      "bande_superieure_a_hz": null,
+      "agitation": 0.026694949216423295
+    },
+    "agent PPO | bruit g~0,1": {
+      "rmse": 0.02668694108344252,
+      "e_max": 0.05663748278351921,
+      "retard_s": 0.1,
+      "bande_passante_hz": 2.421875,
+      "bande_superieure_a_hz": null,
+      "agitation": 0.03737821158267405
+    },
+    "LQI (gains / 2)": {
+      "rmse": 0.07966458722731118,
+      "e_max": 0.1802772870779007,
+      "retard_s": 0.4,
+      "bande_passante_hz": 1.25,
+      "bande_superieure_a_hz": null,
+      "agitation": 0.016182082388122833
+    },
+    "LQI (gains / 2) | bruit g~0,1": {
+      "rmse": 0.079570880609972,
+      "e_max": 0.1807369197557569,
+      "retard_s": 0.4,
+      "bande_passante_hz": 1.25,
+      "bande_superieure_a_hz": null,
+      "agitation": 0.017738045475666188
+    }
+  },
+  "psi": {
+    "agent PPO": {
+      "rmse": 0.03261786835112785,
+      "e_max": 0.06991896348303817,
+      "retard_s": 0.0,
+      "bande_passante_hz": 2.109375,
+      "bande_superieure_a_hz": null,
+      "agitation": 0.04736565090171001,
+      "vitesse_rmse": 0.11689474241780469,
+      "vitesse_e_max": 0.24663875408994082,
+      "vitesse_retard_s": 0.1,
+      "vitesse_bande_passante_hz": 2.109375,
+      "vitesse_bande_superieure_a_hz": null,
+      "vitesse_agitation": 0.04736565090171001
+    },
+    "agent PPO | bruit g~0,1": {
+      "rmse": 0.0325342461743245,
+      "e_max": 0.0694614698927869,
+      "retard_s": 0.0,
+      "bande_passante_hz": NaN,
+      "bande_superieure_a_hz": 1.640625,
+      "agitation": 0.06228039793819304,
+      "vitesse_rmse": 0.1174136176041336,
+      "vitesse_e_max": 0.2594861390172021,
+      "vitesse_retard_s": 0.1,
+      "vitesse_bande_passante_hz": NaN,
+      "vitesse_bande_superieure_a_hz": 1.640625,
+      "vitesse_agitation": 0.06228039793819304
+    },
+    "LQI lacet": {
+      "rmse": 0.13684883991772528,
+      "e_max": 0.3452466173071511,
+      "retard_s": 0.35000000000000003,
+      "bande_passante_hz": 0.46875,
+      "bande_superieure_a_hz": null,
+      "agitation": 0.045463043396080254,
+      "vitesse_rmse": 0.21182507905183107,
+      "vitesse_e_max": 0.45739455182206623,
+      "vitesse_retard_s": 0.35000000000000003,
+      "vitesse_bande_passante_hz": 0.46875,
+      "vitesse_bande_superieure_a_hz": null,
+      "vitesse_agitation": 0.045463043396080254
+    },
+    "LQI lacet | bruit g~0,1": {
+      "rmse": 0.13670025109162706,
+      "e_max": 0.3464841836126036,
+      "retard_s": 0.35000000000000003,
+      "bande_passante_hz": 0.46875,
+      "bande_superieure_a_hz": null,
+      "agitation": 0.101266019793124,
+      "vitesse_rmse": 0.2161662896034983,
+      "vitesse_e_max": 0.5550519507410573,
+      "vitesse_retard_s": 0.35000000000000003,
+      "vitesse_bande_passante_hz": 0.46875,
+      "vitesse_bande_superieure_a_hz": null,
+      "vitesse_agitation": 0.101266019793124
+    }
+  },
+  "x": {
+    "agent PPO": {
+      "rmse": 0.060492433089176054,
+      "e_max": 0.15751619938417027,
+      "retard_s": 0.1,
+      "bande_passante_hz": 1.328125,
+      "bande_superieure_a_hz": null,
+      "agitation": 0.05381545727398676
+    },
+    "agent PPO | bruit g~0,1": {
+      "rmse": 0.06063416260958979,
+      "e_max": 0.16571121858444804,
+      "retard_s": 0.1,
+      "bande_passante_hz": 1.5625,
+      "bande_superieure_a_hz": null,
+      "agitation": 0.06238805853799496
+    },
+    "PD 0.3/0.45": {
+      "rmse": 0.07290158888730959,
+      "e_max": 0.1738232821806863,
+      "retard_s": 0.1,
+      "bande_passante_hz": 1.171875,
+      "bande_superieure_a_hz": null,
+      "agitation": 0.05090536030343881
+    },
+    "PD 0.3/0.45 | bruit g~0,1": {
+      "rmse": 0.07329014241068621,
+      "e_max": 0.17914688278831262,
+      "retard_s": 0.1,
+      "bande_passante_hz": 1.171875,
+      "bande_superieure_a_hz": null,
+      "agitation": 0.05261574533329897
+    }
+  }
+}

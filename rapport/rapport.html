@@ -1,0 +1,1155 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Commande d'un quadrirotor par apprentissage par renforcement</title>
+<style>
+@page{size:A4;margin:22mm 20mm 24mm 20mm;@bottom-center{content:counter(page);font-family:'Segoe UI',Arial,sans-serif;font-size:9pt;color:#666}}
+:root{--ink:#1c1c1c;--muted:#5a5a5a;--accent:#1F3A5F;--rule:#c9c9c9}
+*{box-sizing:border-box}
+html{font-size:10.5pt}
+body{margin:0;color:var(--ink);font-family:Georgia,'Bitstream Charter','Times New Roman',serif;line-height:1.5;counter-reset:fig tab;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+h1,h2,h3,h4,caption,figcaption,th,.label,.toc,.meta{font-family:'Segoe UI',Calibri,Carlito,Arial,sans-serif}
+p{margin:0 0 .7em;text-align:justify;hyphens:auto}
+.cover{padding-top:6mm;margin-bottom:10mm;padding-bottom:8mm;border-bottom:1px solid var(--rule)}
+.cover .meta{font-size:9.5pt;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 14mm}
+.cover h1{font-size:25pt;line-height:1.15;font-weight:600;color:var(--accent);margin:0 0 5mm;letter-spacing:-.01em;border:0}
+.cover .sub{font-size:13pt;color:var(--muted);margin:0 0 10mm;font-family:'Segoe UI',Calibri,Arial,sans-serif;font-weight:400}
+.abstract{max-width:150mm}
+.abstract h2{font-size:10pt;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 2mm;border:0}
+.toc{margin:8mm 0 0;font-size:10pt;columns:2;column-gap:12mm}
+.toc div{margin:0 0 1.2mm;break-inside:avoid}
+.toc .part{margin-top:2.5mm;font-weight:600;color:var(--accent)}
+.toc .part:first-child{margin-top:0}
+h1.part{font-size:19pt;font-weight:600;color:var(--accent);margin:0 0 6mm;padding-top:2mm;border-top:2px solid var(--accent);break-before:page;line-height:1.2}
+h1.part span{display:block;font-size:9.5pt;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500;margin:3mm 0 1mm}
+h2{font-size:14pt;font-weight:600;color:var(--accent);margin:9mm 0 3mm;break-after:avoid;line-height:1.25}
+h3{font-size:11pt;font-weight:600;margin:6mm 0 2mm;break-after:avoid}
+ul,ol{margin:0 0 .8em;padding-left:1.3em}li{margin-bottom:.3em}
+code{font-family:Consolas,'Courier New',monospace;font-size:.88em;background:#f1f1f1;padding:0 .25em;border-radius:2px}
+strong{font-weight:600}
+figure{margin:5mm 0;text-align:center;break-inside:avoid}
+figure img{max-width:100%;max-height:78mm;height:auto}
+figure.s img{max-width:70%;max-height:52mm}
+figure.m img{max-width:82%;max-height:66mm}
+figure.t img{max-height:82mm}
+ul,ol{break-inside:avoid}
+.two{break-inside:avoid}
+/* un texte qui présente un graphe, un tableau ou une équation reste sur la même page que lui ; un texte qui le commente aussi */
+p:has(+ figure),p:has(+ .two),p:has(+ table),p:has(+ .eq),p:has(+ ul),p:has(+ ol),ul:has(+ figure),ul:has(+ table),ol:has(+ figure),.eq:has(+ .eq),.eq:has(+ figure){break-after:avoid}
+figure + p,.two + p,table + p,.eq + p{break-before:avoid}
+p{orphans:3;widows:3}
+h1.part{break-after:avoid;break-inside:avoid}
+table.ref{font-size:8.3pt;margin-top:2mm}
+table.ref tbody td{padding:.9mm 2.2mm}
+table.ref code{font-size:.85em}
+figcaption{counter-increment:fig;font-size:9pt;color:var(--muted);margin-top:2mm;text-align:left;line-height:1.4}
+figcaption:before{content:"Figure " counter(fig) ". ";font-weight:600;color:var(--ink)}
+table{border-collapse:collapse;width:100%;margin:4mm 0 5mm;font-family:'Segoe UI',Calibri,Arial,sans-serif;font-size:9pt;font-variant-numeric:tabular-nums;break-inside:avoid}
+caption{counter-increment:tab;caption-side:top;text-align:left;font-size:9pt;color:var(--muted);padding-bottom:2mm}
+caption:before{content:"Tableau " counter(tab) ". ";font-weight:600;color:var(--ink)}
+thead th{border-top:1.5px solid var(--ink);border-bottom:1px solid var(--ink);text-align:left;font-weight:600;padding:1.6mm 2.2mm}
+tbody td{padding:1.5mm 2.2mm;border-bottom:.5px solid var(--rule);vertical-align:top}
+tbody tr:last-child td{border-bottom:1.5px solid var(--ink)}
+tr.em td{font-weight:600;background:#eef2f7}
+.note{margin:4mm 0 5mm;padding:2.5mm 0;border-top:.75px solid var(--rule);border-bottom:.75px solid var(--rule);break-inside:avoid}
+.note p:last-child{margin-bottom:0}
+.label{font-size:8.5pt;letter-spacing:.1em;text-transform:uppercase;font-weight:600;color:var(--accent);display:block;margin-bottom:1mm}
+.note.warn .label{color:#8a4300}
+.eq{margin:3mm 0 4mm;padding:2.5mm 4mm;background:#f6f6f6;font-family:Consolas,'Courier New',monospace;font-size:9pt;line-height:1.7;white-space:pre;break-inside:avoid}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:6mm}
+.small{font-size:9.5pt;color:var(--muted)}
+.todo li{margin-bottom:.5em}
+.print-only{display:none}
+@media print{.screen-only{display:none}.print-only{display:block}}
+figure.t img{max-width:100%}
+</style>
+</head>
+<body>
+
+<header class="cover">
+<p class="meta">CentraleSupélec · Data-Driven Control · Compte rendu</p>
+<h1>Commande d'un quadrirotor : référence LQI et agent d'apprentissage par renforcement</h1>
+<p class="sub">Du nettoyage des données à l'atterrissage sur une voiture en mouvement, sur Simulink</p>
+<div class="abstract">
+<h2>Résumé</h2>
+<p>Nous avons d'abord construit une commande de référence : un modèle d'état identifié pour l'altitude et le lacet, puis un régulateur LQI calculé par <code>dlqr</code>, trop vif à 50 ms (gains divisés par deux). Nous avons ensuite identifié le drone (réseau GRU pour <i>z</i> et le lacet, ARX pour l'attitude), construit des environnements d'apprentissage, et entraîné des agents PPO qui se transfèrent sur Simulink sans réentraînement. L'agent d'altitude suit une PRBS avec 2,7 cm de RMSE, contre 8,3 cm pour le LQI double intégrateur (gains réajustés pour 20 Hz) et 5,6 cm pour un LQ synthétisé sur un modèle ARX ; l'agent de lacet tient un scan de 360° à 0,39°, contre 9,8° pour le LQI. Les gains du LQI, réglés sur des modèles Simulink continus, font osciller <i>z</i> et divergent sur θ lorsqu'ils sont échantillonnés à 20 Hz ; réajustés, ils fonctionnent, et l'écart restant vient du modèle double intégrateur, qui ignore la dynamique des moteurs. L'agent de position, réentraîné pour les saturations, pilote les deux axes horizontaux sans nouvel entraînement grâce à la symétrie de l'ARX et à une rotation des erreurs par ψ. La mission finale (décollage, scan de 360°, poursuite d'une voiture en virage, atterrissage dessus) est volée sur Simulink : le drone se pose au bout de 30,1 s, à 0,8 cm du centre de la plateforme, avec 1,3 cm/s de vitesse relative et 0,2° d'écart de cap, et 13 voitures aléatoires sur 13 sont rejointes en simulation. L'organisation du code, les vérifications MATLAB = Python et un mode d'emploi complet figurent en fin de document.</p>
+</div>
+<div class="toc">
+<div class="part">I. Préparation et contrôleurs de référence</div>
+<div>1. Données et nettoyage</div>
+<div>2. Contrôle de l'altitude (LQI)</div>
+<div>3. Contrôle du lacet (LQI)</div>
+<div>4. La référence à 50 ms</div>
+<div class="part">II. Apprentissage par renforcement</div>
+<div>5. Modèle du drone : un GRU</div>
+<div>6. Environnement d'apprentissage</div>
+<div>7. Entraînements : SAC puis PPO</div>
+<div>8. Passage sur Simulink</div>
+<div>9. Mission de la Figure 1</div>
+<div class="part">III. Tâches avancées</div>
+<div>10. Étape A : interface du drone</div>
+<div>11. Étape B1 : données et modèle du lacet</div>
+<div>12. Étape B2 : agent de lacet et vol Simulink</div>
+<div>13. Étape C1 : attitude (tangage et roulis)</div>
+<div>14. Cascade en x et atterrissage sur une voiture</div>
+<div>15. Étape C2 : agent PPO pour la position x</div>
+<div>16. Essais PRBS des agents et des contrôleurs</div>
+<div>17. Étape C2.4 : vol de l'agent x sur Simulink</div>
+<div>18. Étape C3 : position (x, y) et rotation par ψ</div>
+<div>19. Mission finale : scan, poursuite, atterrissage</div>
+<div class="part">IV. Comparaison LQI / LQ ARX / RL</div>
+<div>20. Comparaisons contrôleur par contrôleur</div>
+<div class="part">V. Organisation du code et suite</div>
+<div>21. Organisation du code et reproductibilité</div>
+<div>22. Annexe : mode d'emploi</div>
+<div>23. Limites et points à traiter</div>
+<div>24. Supports visuels et démonstrations</div>
+</div>
+</header>
+
+<h1 class="part" style="break-before:auto;margin-top:0"><span>Partie I</span>Préparation et contrôleurs de référence</h1>
+
+<h2>1. Données et nettoyage</h2>
+
+<h3>1.1 Nettoyage</h3>
+<p>Les données brutes (<code>bdd_in_mat_05.csv</code> pour la commande <i>u</i>, <code>bdd_out_mat_05.csv</code> pour l'accélération verticale <i>a<sub>z</sub></i>) contiennent 3000 essais de 2000 pas, issus d'un capteur peu fiable. Le script de nettoyage retire un essai en entier lorsqu'il est corrompu, car un modèle dynamique a besoin d'un historique continu. Trois critères sont appliqués : valeurs manquantes, valeurs hors de la plage physique (<i>a<sub>z</sub></i> doit rester dans [−40 ; 20] m/s² alors que <i>u</i> ∈ [−1 ; 1] donne environ −30 à +10 m/s²), et capteur figé (plus de 10 valeurs identiques consécutives).</p>
+<p>Quatre essais sont retirés (122, 455, 1233 et 1677), ce qui laisse <strong>2996 essais</strong> exploitables.</p>
+<figure class="m"><img src="figures/nettoyage_donnees.png" alt="Un essai normal et les quatre essais retirés"><figcaption>Un essai normal (haut) et les quatre essais retirés (bas) : bruit de grande amplitude, et capteur bloqué sur une valeur constante pour l'essai 1677.</figcaption></figure>
+<p>Une normalisation des données est nécessaire pour entraîner un réseau de neurones, mais elle est exclue pour l'interaction avec Simulink, qui travaille en unités physiques. Nous avons donc choisi des échelles <em>fixes</em>, écrites à la main dans l'observation de l'agent (partie II), plutôt qu'une normalisation apprise.</p>
+
+<h3>1.2 Ce que les données apprennent sur le drone</h3>
+<ul>
+<li>L'actionneur se comporte comme un premier ordre, de constante de temps <strong>τ ≈ 0,20 s</strong>.</li>
+<li><i>u</i>(<i>k</i>) agit sur <i>a<sub>z</sub></i>(<i>k</i>+1) : il y a un retard d'un pas (Ts = 50 ms).</li>
+<li>Le bruit de mesure sur <i>a<sub>z</sub></i> vaut <strong>0,044 m/s²</strong>, mesuré sur des segments au repos.</li>
+<li>Le vol stationnaire correspond à <i>u</i><sub>eq</sub> ≈ <strong>0,39</strong>.</li>
+<li>La caractéristique statique est non linéaire : <i>a<sub>z</sub></i> va d'environ −30 à +10,6 m/s² quand <i>u</i> va de −1 à +1.</li>
+</ul>
+<figure><img src="figures/fig_donnees.png" alt="Trois essais d'identification"><figcaption>Trois essais de la base nettoyée. La commande est une suite de paliers aléatoires ; l'accélération répond en quelques dixièmes de seconde.</figcaption></figure>
+<figure class="m"><img src="figures/gru_statique_echelons.png" alt="Caractéristique statique et réponses indicielles"><figcaption>Caractéristique statique (gauche) et réponses indicielles pour six valeurs de <i>u</i> (droite). La courbe en S et la montée en environ 0,5 s caractérisent la poussée et l'actionneur.</figcaption></figure>
+
+<h2>2. Contrôle de l'altitude (LQI)</h2>
+<p>Objectif : disposer d'un contrôleur de référence capable de suivre le profil d'altitude 0 m, puis +0,5 m, puis −0,25 m, afin de le comparer à l'agent d'apprentissage par renforcement.</p>
+
+<h3>2.1 Modèle : un double intégrateur</h3>
+<p>L'altitude est modélisée par un double intégrateur dont le gain de poussée <i>k</i> est identifié par moindres carrés sur l'ensemble des essais (<code>numpy.linalg.lstsq</code> en Python, opérateur <code>\</code> en MATLAB), avec compensation de la gravité :</p>
+<div class="eq">a<sub>z</sub> + g = k · u        ⇒        k ≈ 18,4 m/s²   (18,3 à 18,4 selon la façon de compenser la gravité)</div>
+<div class="eq">ẋ = [0 1 ; 0 0]·x + [0 ; k]·u,   x = [z ; v<sub>z</sub>]      discrétisé par maintien d'ordre zéro, T<sub>s</sub> = 0,05 s</div>
+<figure class="m"><img src="figures/lqi_z_identification.png" alt="Paliers mesurés et modèle linéaire"><figcaption>Gain de poussée. La droite <i>k·u</i> approche la caractéristique réelle mais la sous-estime au voisinage du vol stationnaire : elle placerait l'équilibre à <i>u</i> = 0,53 au lieu de 0,39. La pente locale autour de <i>u</i><sub>eq</sub> vaut environ 22,7 m/s², contre 18,3 pour la droite globale.</figcaption></figure>
+<div class="note"><span class="label">Conséquence</span><p>Le modèle linéaire ne connaît ni le point d'équilibre réel ni la courbure de la poussée. Le point d'équilibre est donc réintroduit par un terme d'anticipation (voir 2.2), et la pente locale plus forte que le gain identifié est un contributeur plausible de l'oscillation observée à la section 4 (hypothèse non testée).</p></div>
+
+<h3>2.2 Synthèse du régulateur</h3>
+<p>Un premier régulateur LQR sans intégrale laissait une erreur statique : le drone se stabilisait à 0,9 m au lieu de 1 m. Le modèle est donc augmenté d'un état intégral, et la synthèse porte sur <i>x</i> = [<i>z</i> ; <i>v<sub>z</sub></i> ; ∫<i>e</i>] avec la fonction <code>dlqr</code> :</p>
+<table>
+<caption>Paramètres et gains de la synthèse LQI de l'altitude (<code>LQI.m</code>).</caption>
+<thead><tr><th>Élément</th><th>Valeur</th></tr></thead>
+<tbody>
+<tr><td>Pondérations <i>Q</i></td><td>diag(80 ; 25 ; 25)</td></tr>
+<tr><td>Pondération <i>R</i></td><td>1</td></tr>
+<tr><td>Gains optimaux <code>dlqr</code></td><td><i>K</i><sub>p</sub> = 2,32 · <i>K</i><sub>d</sub> = 1,10 · <i>K</i><sub>i</sub> = 0,98</td></tr>
+<tr class="em"><td>Gains retenus (× 0,8, marge de robustesse)</td><td><i>K</i><sub>p</sub> = 1,86 · <i>K</i><sub>d</sub> = 0,88 · <i>K</i><sub>i</sub> = 0,79</td></tr>
+</tbody></table>
+<p>La loi de commande est <i>u</i> = <i>u</i><sub>0</sub> − <i>K</i><sub>p</sub>(<i>z</i> − <i>z</i><sub>ref</sub>) − <i>K</i><sub>d</sub> <i>v<sub>z</sub></i> − <i>K</i><sub>i</sub> ∫(<i>z</i> − <i>z</i><sub>ref</sub>), saturée à ±1, avec un terme d'anticipation de gravité <i>u</i><sub>0</sub> ≈ 0,38 à 0,4. Les pics de commande ont été éliminés de deux façons dans Simulink : la consigne passe par un filtre <code>Transfer Fcn</code> de constante τ = 1,2 s, et l'intégrateur est borné (anti-windup).</p>
+
+<h2>3. Contrôle du lacet (LQI)</h2>
+<p>Objectif : faire pivoter le drone autour de son axe vertical grâce au couple de réaction aérodynamique des moteurs, sans altérer l'altitude.</p>
+
+<h3>3.1 Identification du gain de lacet</h3>
+<p>Une réponse indicielle (<i>u</i><sub>ψ</sub> = 0,1 pendant 5 s) donne une vitesse angulaire croissante linéairement. Pour neuf impulsions de commande <i>u</i><sub>ψ</sub>·Δ<i>t</i>, la vitesse de lacet atteinte est relevée (en rad/s, voir l'étape A) et une régression linéaire sans ordonnée à l'origine, <i>y</i> = <i>k</i>·<i>x</i>, en tire le gain :</p>
+<div class="eq">k<sub>ψ</sub> = Σ x·y / Σ x²  ≈ 168 rad/s² par unité de commande   (unité confirmée à l'étape A)</div>
+<figure class="s"><img src="figures/lqi_psi_identification.png" alt="Régression linéaire du gain de lacet"><figcaption>Régression du gain de lacet sur neuf mesures. L'alignement des points sur la droite valide le modèle d'un double intégrateur pour ψ.</figcaption></figure>
+
+<h3>3.2 Synthèse</h3>
+<p>Le modèle [ψ ; <i>ψ̇</i>] est un double intégrateur de gain <i>k</i><sub>ψ</sub>, discrétisé à 50 ms puis augmenté d'un état intégral, comme pour l'altitude. La commande de lacet pénalise davantage l'effort que celle de l'altitude (<i>R</i> = 10 au lieu de 1) :</p>
+<table>
+<caption>Paramètres et gains de la synthèse LQI du lacet (<code>ident_psi.m</code>).</caption>
+<thead><tr><th>Élément</th><th>Valeur</th></tr></thead>
+<tbody>
+<tr><td>Gain <i>k</i><sub>ψ</sub></td><td>168 rad/s² par unité de commande</td></tr>
+<tr><td>Pondérations <i>Q</i> / <i>R</i></td><td>diag(120 ; 40 ; 30) / 10</td></tr>
+<tr class="em"><td>Gains <code>dlqr</code></td><td><i>K</i><sub>p</sub> = 0,252 · <i>K</i><sub>d</sub> = 0,125 · <i>K</i><sub>i</sub> = 0,097</td></tr>
+</tbody></table>
+<p>Pour atténuer les oscillations de la commande face à une consigne en rampe, un lissage de la référence a été intégré au schéma Simulink, comme pour l'altitude.</p>
+<div class="note"><span class="label">Unité du gain de lacet</span><p>La régression a d'abord été lue comme une pente en °/s (soit 168 °/s², environ 2,93 rad/s²). Les essais de l'étape A montrent que <code>UAV_model</code> travaille en unités SI, angles en radians, et que le gain de lacet vaut environ 170 rad/s² par unité de commande, ce que confirment l'identification de la section 11 (172,9 par ARX, 172,5 par impulsions). La valeur 168 est donc un gain en <strong>rad/s²</strong>, et les gains du tableau 2 sont corrects pour ψ en radians. Dans <code>ident_psi.m</code>, la conversion <code>2.93*180/3.14</code> redonne ce nombre sans qu'il faille le lire en degrés.</p></div>
+
+<h2>4. La référence à 50 ms</h2>
+<p>Le LQI n'intervient pas dans l'apprentissage : il sert de point de comparaison. Il doit donc être réglé pour les mêmes conditions que l'agent, dont la boucle est échantillonnée à 50 ms.</p>
+
+<h3>4.1 Un LQI qui oscille</h3>
+<p>Avec les gains de la section 2, le LQI oscille à <strong>1,5 Hz</strong> dès qu'on le simule dans l'environnement échantillonné à 50 ms (amortissement d'environ 2 %).</p>
+<figure class="s"><img src="figures/lqi_python_oscillation.png" alt="Réponse du LQI à un échelon de 0,5 m avec les gains d'origine"><figcaption>Réponse du LQI à un échelon de 0,5 m, gains d'origine, boucle à 50 ms : <i>z</i> oscille sans s'amortir et la commande saute entre −0,4 et 1.</figcaption></figure>
+
+<h3>4.2 Diagnostic, établi sur des copies de <code>Simu_LQ.slx</code></h3>
+<p>La boucle de <code>Simu_LQ</code> est <strong>continue</strong>, alors que celle de <code>EINT_RL_closed_loop</code> est <strong>échantillonnée à 50 ms</strong>. Un retard de 75 ms coûte environ 40° de marge de phase à 1,5 Hz. Les essais ont été faits sur des copies des fichiers.</p>
+<table>
+<caption>Même échelon de 0,5 m, avec ou sans échantillonnage de la boucle (Simulink sauf mention).</caption>
+<thead><tr><th>Cas</th><th><i>z</i> max</th><th>Oscillation entre 5 et 10 s</th><th><i>z</i> final</th></tr></thead>
+<tbody>
+<tr><td>Boucle continue (<code>Simu_LQ</code> tel quel)</td><td>0,522 m</td><td>0,019 m</td><td>0,502 m</td></tr>
+<tr><td>Bloqueurs de 10 ms</td><td>0,522 m</td><td>0,018 m</td><td>0,502 m</td></tr>
+<tr><td>Bloqueurs de 50 ms</td><td>0,579 m</td><td>0,087 m</td><td>0,526 m</td></tr>
+<tr><td>Python (GRU), 50 ms</td><td>0,592 m</td><td>0,114 m</td><td>0,532 m</td></tr>
+<tr class="em"><td>Bloqueurs de 50 ms, gains ÷ 2</td><td>0,542 m</td><td>0,024 m</td><td>0,502 m</td></tr>
+<tr class="em"><td>Python (GRU), gains ÷ 2</td><td>0,546 m</td><td>0,025 m</td><td>0,502 m</td></tr>
+</tbody></table>
+<figure class="t"><img src="figures/lqi_continu_vs_echantillonne.png" alt="Comparaison boucle continue, bloqueurs de 50 ms et Python"><figcaption>Seule la période des bloqueurs change entre les cas à 10 ms et à 50 ms, et l'oscillation n'apparaît qu'à 50 ms. En bas, diviser les gains par 2 supprime l'oscillation, sur Simulink comme en Python.</figcaption></figure>
+
+<h3>4.3 Référence retenue</h3>
+<ul>
+<li>La cause est l'échantillonnage, pas les gains ni le modèle.</li>
+<li>Le GRU de la partie II reproduit Simulink en boucle fermée : les courbes Python et Simulink se superposent. C'est la validation la plus exigeante du modèle.</li>
+<li>La référence retenue est le LQI de la section 2 avec les <strong>gains divisés par 2</strong> (0,93 / 0,44 / 0,395), pour une RMSE sur la consigne lissée de 0,085 m.</li>
+</ul>
+<div class="note warn"><span class="label">Limite</span><p>Ces gains ont été réduits « à la main » et non recalculés. Un <code>dlqr</code> sur un modèle à 20 Hz incluant l'actionneur (τ ≈ 0,2 s) et le retard d'un pas serait plus rigoureux. Il est proposé, non réalisé.</p></div>
+
+
+<h1 class="part"><span>Partie II</span>Apprentissage par renforcement</h1>
+
+<h2>5. Modèle du drone : un GRU</h2>
+<p>Pour entraîner un agent, il faut simuler des milliers de vols rapidement. Un GRU d'une couche et 64 neurones reçoit <i>u</i>(<i>k</i>−1) et prédit <i>a<sub>z</sub></i>. Il est exporté en numpy (<code>gru_drone.npz</code>). L'entraînement dure 150 époques, avec 3 graines et un découpage 70 / 15 / 15.</p>
+<table>
+<caption>Qualité du modèle sur l'ensemble de test.</caption>
+<thead><tr><th>Modèle</th><th>RMSE sur <i>a<sub>z</sub></i></th><th>Dérive de <i>z</i> après 10 s</th></tr></thead>
+<tbody>
+<tr class="em"><td>GRU (notre modèle)</td><td>0,0450 m/s² (plancher du bruit : 0,044)</td><td>0,21 m</td></tr>
+<tr><td>RNN du groupe (v3)</td><td>0,0906 m/s²</td><td>1,13 m</td></tr>
+</tbody></table>
+<p>La RMSE est au niveau du bruit de mesure : avec ces données, aucun modèle ne peut faire mieux. La dérive de <i>z</i>, obtenue en double-intégrant <i>a<sub>z</sub></i>, est cinq fois plus faible que celle du modèle du groupe.</p>
+<div class="two">
+<figure><img src="figures/gru_apprentissage.png" alt="Courbes d'apprentissage du GRU"><figcaption>Erreur de validation de trois graines, convergeant vers le bruit de mesure.</figcaption></figure>
+<figure><img src="figures/gru_derive_z.png" alt="Dérive de z"><figcaption>Dérive de <i>z</i> en simulation libre, depuis le repos.</figcaption></figure>
+</div>
+<figure class="m"><img src="figures/gru_test_sequence.png" alt="Essai de test en simulation libre"><figcaption>Un essai de test en simulation libre : le GRU suit la mesure sur 20 s sans correction.</figcaption></figure>
+
+<h2>6. Environnement d'apprentissage</h2>
+<p>Chaque choix de <code>drone_env.py</code> a été fait pour pouvoir être recopié à l'identique dans <code>rl_controller.m</code>, car c'est ce fichier qui fait voler l'agent dans Simulink.</p>
+
+<h3>6.1 Physique et consigne</h3>
+<ul>
+<li><i>u</i>(<i>k</i>) → GRU → <i>a<sub>z</sub></i>(<i>k</i>+1), puis <i>v<sub>z</sub></i> et <i>z</i> par intégration trapézoïdale, au pas de 50 ms. Un vol dure 200 pas (10 s).</li>
+<li>Le départ est à <i>z</i> = 0 en <strong>chute libre</strong>, comme dans Simulink.</li>
+<li>La hauteur cible est tirée dans [−0,5 ; 1] m et atteinte par un <strong>filtre du 2<sup>e</sup> ordre critique (τ = 0,35 s)</strong>. Un échelon brut est physiquement inatteignable ; la consigne lissée rend l'objectif réaliste, et sa dérivée donne une vitesse de consigne exacte.</li>
+<li>Le bruit de mesure est optionnel et n'affecte que ce que voit le contrôleur.</li>
+</ul>
+<div class="eq">z_ref(t) = z_c · [ 1 − (1 + t/τ) · exp(−t/τ) ]        v_ref(t) = z_c · (t/τ²) · exp(−t/τ)</div>
+<figure class="m"><img src="figures/fig_consigne.png" alt="Consigne lissée et vitesse de consigne"><figcaption>Consigne lissée. À gauche, trois cibles de l'entraînement ; à droite, la mission finale, somme de deux sauts lissés (à 3 s et 7 s).</figcaption></figure>
+
+<h3>6.2 Observation</h3>
+<p>L'agent est une fonction « observation → <i>u</i> » sans état interne : toute la mémoire (l'intégrale) est calculée à côté, ce qui rend l'export vers MATLAB possible en quelques lignes. Il reçoit six grandeurs :</p>
+<ol>
+<li>l'erreur de suivi (<i>z</i><sub>ref</sub> − <i>z</i>) / 0,5 ;</li>
+<li>la vitesse verticale <i>v<sub>z</sub></i> ;</li>
+<li>l'accélération précédente <i>a<sub>z</sub></i><sub>,prev</sub> / 10 ;</li>
+<li>la commande précédente <i>u</i><sub>prev</sub> ;</li>
+<li>l'intégrale conditionnelle de l'erreur, divisée par 0,5 ;</li>
+<li>l'erreur de vitesse <i>v</i><sub>ref</sub> − <i>v<sub>z</sub></i>.</li>
+</ol>
+<p>L'intégrale n'intègre que si |<i>e</i>| &lt; 0,1 m et reste bornée à ±0,5 m·s. Sans cette règle, elle saturait à chaque montée et ne portait plus d'information : l'agent avait appris à l'ignorer.</p>
+
+<h3>6.3 Récompense</h3>
+<p>La récompense est la somme de cinq termes bornés. Un vol raté coûte au pire une centaine de points, un vol parfait en rapporte environ 200 ; c'est ce qui a stabilisé l'apprentissage.</p>
+<div class="eq">r =  0,5·exp(−(e/0,05)²) + 0,5·exp(−(e/0,30)²)     précision fine, guidage moyen
+   − 0,2·min(|e|, 1)                                guidage lointain
+   − 0,2·(1 − exp(−(e_v/0,3)²))                     suivi de la vitesse de consigne
+   − 3·(u − u_prev)²                                douceur de la commande</div>
+<figure><img src="figures/fig_recompense.png" alt="Termes de la récompense"><figcaption>Termes de la récompense. Une seule gaussienne étroite donnerait de la précision mais aucune direction au-delà de 15 cm ; la seconde guide de loin et la pente linéaire de plus loin encore. La courbe de l'ancienne récompense est une reconstruction, à vérifier dans l'ancien code.</figcaption></figure>
+
+<h2>7. Entraînements : SAC puis PPO</h2>
+
+<h3>7.1 Premier essai : SAC</h3>
+<p>Premier entraînement avec une récompense plus simple (V1, opposé d'un pseudo-Huber de 10 cm et pénalité de 0,5 sur Δ<i>u</i>) : 100 000 pas, 28 minutes sur CPU, réseaux 2×256, entropie automatique. Le meilleur agent date de 30 000 pas. L'apprentissage est ensuite instable : le rendement vaut −774 à 20 000 pas puis −21 680 à 90 000 pas, quand le drone s'éloigne de plus de 11 m.</p>
+<table>
+<caption>Meilleur agent SAC contre la référence LQI (20 cibles, sans bruit).</caption>
+<thead><tr><th>Contrôleur</th><th>Rendement</th><th>RMSE lissée</th><th>Dépassement</th><th>Erreur finale</th><th>Agitation de <i>u</i></th></tr></thead>
+<tbody>
+<tr><td>SAC (run 1)</td><td>−39,4</td><td>0,072 m</td><td>0,082 m</td><td>0,039 m</td><td>0,024</td></tr>
+<tr><td>LQI (gains ÷ 2)</td><td>−43,5</td><td>0,085 m</td><td>0,119 m</td><td>0,001 m</td><td>0,022</td></tr>
+</tbody></table>
+<div class="two">
+<figure><img src="figures/sac_courbe_apprentissage.png" alt="Courbe d'apprentissage SAC"><figcaption>Une courbe en dents de scie, avec un effondrement à 90 000 pas.</figcaption></figure>
+<figure><img src="figures/sac_vols_vs_lqi.png" alt="Vols SAC contre LQI"><figcaption>L'agent oscille autour de ±0,5 m et reste 6 cm sous la cible de 1 m.</figcaption></figure>
+</div>
+
+<h3>7.2 Diagnostic</h3>
+<p>La décomposition de la récompense sur les vols montre que l'agent fait exactement ce que la récompense lui demande :</p>
+<ul>
+<li>la pénalité sur Δ<i>u</i> pèse moins de 1 % du total (−0,2 à −1,1 par vol contre −20 à −90 pour le suivi) : l'agent « achète » une montée rapide (+17 points) avec des oscillations en régime établi (−14 points) ;</li>
+<li>l'intégrale saturait à chaque montée, d'où les 6 cm restants à 1 m ;</li>
+<li>les récompenses allaient de −0,01 à −40 000, et la perte du critique faisait des pics (de 700 à 190 000) ;</li>
+<li>l'entropie restait élevée (α ≈ 0,7 à 0,85) alors que les récompenses près de la cible sont minuscules.</li>
+</ul>
+
+<h3>7.3 Corrections et passage à PPO</h3>
+<p>Nous avons adopté la récompense bornée de la section 6.3, ajouté la vitesse de consigne à l'observation, et rendu l'intégrale conditionnelle. Nous sommes passés à PPO avec 16 drones en parallèle : le GPU n'aide pas, car SAC fait environ 70 mises à jour par seconde quel que soit l'appareil (le temps est dans le code Python, pas dans le calcul).</p>
+<table>
+<caption>Débit d'entraînement mesuré.</caption>
+<thead><tr><th>Configuration</th><th>Transitions par seconde</th></tr></thead>
+<tbody>
+<tr><td>SAC, CPU, 1 drone (run 1)</td><td>67</td></tr>
+<tr><td>SAC, GPU, 1 drone</td><td>69</td></tr>
+<tr><td>SAC, GPU, 16 drones</td><td>284</td></tr>
+<tr class="em"><td>PPO, CPU, 16 drones</td><td>5 248</td></tr>
+<tr><td>PPO, GPU, 16 drones</td><td>3 330</td></tr>
+</tbody></table>
+<div class="note warn"><span class="label">Deux corrections décisives</span><p>Le premier essai PPO a échoué (RMSE de 160 m) : une politique initialisée avec une sortie à 0 commande <i>u</i> = 0, donc la chute libre, et les gaussiennes de la récompense sont plates loin de la cible. D'où le terme linéaire <code>−0,2·min(|e|, 1)</code> et l'initialisation du biais de sortie à 0,39, pour que l'agent démarre en vol stationnaire.</p></div>
+
+<h3>7.4 Résultat : PPO, 400 000 transitions en 1,5 minute</h3>
+<table>
+<caption>Comparaison sur 20 hauteurs cibles fixes, sans bruit, dans le modèle Python.</caption>
+<thead><tr><th>Contrôleur</th><th>Rendement</th><th>RMSE lissée</th><th>Dépassement</th><th>Erreur finale</th><th>Agitation de <i>u</i></th></tr></thead>
+<tbody>
+<tr class="em"><td>Agent PPO</td><td>187,0</td><td>0,042 m</td><td>0,009 m</td><td>0,0008 m</td><td>0,012</td></tr>
+<tr><td>LQI (gains ÷ 2)</td><td>148,9</td><td>0,085 m</td><td>0,119 m</td><td>0,0014 m</td><td>0,022</td></tr>
+<tr><td>SAC (run 1, récompense V1)</td><td>non comparable</td><td>0,072 m</td><td>0,082 m</td><td>0,039 m</td><td>0,024</td></tr>
+</tbody></table>
+<figure class="m"><img src="figures/fig_synthese.png" alt="Synthèse des trois contrôleurs"><figcaption>Le PPO est meilleur sur les quatre indicateurs. Même consigne, même boucle à 50 ms, mêmes cibles : la comparaison est équitable.</figcaption></figure>
+<div class="two">
+<figure><img src="figures/ppo_courbe_apprentissage.png" alt="Courbe d'apprentissage PPO"><figcaption>Apprentissage stable : 179, 186,5, 186,2 puis 187,0 aux quatre évaluations.</figcaption></figure>
+<figure><img src="figures/ppo_vols_vs_lqi.png" alt="Vols PPO contre LQI"><figcaption>L'agent colle à la consigne lissée ; le plongeon initial est la chute libre du départ.</figcaption></figure>
+</div>
+<p>Dans le modèle Python, la robustesse au bruit est bonne pour le suivi (RMSE lissée de 0,042 à 0,045 m contre 0,085 à 0,089 m pour le LQI), mais l'agitation de <i>u</i> monte à 0,189 à fort bruit (0,05) contre 0,069 pour le LQI. C'est le défaut principal de l'agent.</p>
+
+<h2>8. Passage sur Simulink</h2>
+<p><code>rl_controller.m</code> est appelé à chaque pas par un bloc MATLAB Function de <code>EINT_RL_closed_loop.slx</code>. Les fonctions <code>mission()</code> et <code>observation()</code> devaient reproduire Python à l'identique.</p>
+<h3>8.1 Vérifications</h3>
+<ul>
+<li><strong>Le contrôle sur 200 pas.</strong> <code>check_controller</code> compare MATLAB à <code>traj_model.mat</code> (tolérance 1e-9 sur la consigne, 1e-5 sur les observations, 1e-4 sur <i>u</i>). Il a d'abord signalé cinq erreurs de lecture des mesures ; après correction : « Check OK ».</li>
+<li><strong>Le rejeu hors ligne de 16 vols.</strong> La commande recalculée à partir des mesures enregistrées est identique au bit près : Simulink appelle le contrôleur une seule fois par pas, donc l'intégrale <code>persistent</code> avance au bon rythme. Le contrôle sur 200 pas ne pouvait pas le détecter.</li>
+</ul>
+<h3>8.2 Le GRU est un bon substitut du vrai drone</h3>
+<table>
+<caption>Même agent, même consigne (cible 0,5 m), sans bruit.</caption>
+<thead><tr><th>Simulateur</th><th>RMSE lissée</th><th><i>z</i> minimum</th><th><i>z</i> final</th></tr></thead>
+<tbody>
+<tr><td>Python (GRU)</td><td>0,046 m</td><td>−0,135 m</td><td>0,5008 m</td></tr>
+<tr class="em"><td>Simulink (<code>UAV_model</code>)</td><td>0,043 m</td><td>−0,124 m</td><td>0,5008 m</td></tr>
+</tbody></table>
+<p>L'écart est de 4 mm en RMSE (25 mm au maximum, pendant la montée) : l'agent, entraîné uniquement sur le GRU, se transfère sans perte au vrai modèle.</p>
+<h3>8.3 Bruit de mesure</h3>
+<table>
+<caption>Agent PPO sur Simulink, cible 0,5 m (moyenne de 5 vols par niveau ; régime établi sur les 5 dernières secondes).</caption>
+<thead><tr><th><code>g_noise</code></th><th>RMSE lissée</th><th>Dépassement</th><th>Écart-type de <i>z</i></th><th>Agitation de <i>u</i></th></tr></thead>
+<tbody>
+<tr><td>0</td><td>0,043 m</td><td>0,001 m</td><td>0,000</td><td>0,012</td></tr>
+<tr><td>0,1</td><td>0,043 m</td><td>0,013 m</td><td>0,005</td><td>0,028</td></tr>
+<tr><td>0,3</td><td>0,045 m</td><td>0,036 m</td><td>0,014</td><td>0,057</td></tr>
+<tr><td>1</td><td>0,063 m</td><td>0,124 m</td><td>0,047</td><td>0,174</td></tr>
+</tbody></table>
+<figure class="m"><img src="figures/ppo_simulink_bruits.png" alt="Agent PPO sur Simulink pour plusieurs niveaux de bruit"><figcaption>Agent PPO sur <code>UAV_model</code> : un vol sans bruit et cinq vols par niveau de bruit. Le départ est identique : chute libre, <i>u</i> = 1 pendant 0,3 s, plongeon à −0,12 m, puis l'agent coupe presque les gaz pour ne pas dépasser.</figcaption></figure>
+<p class="small">À <code>g_noise</code> = 1, l'écart-type de <i>z</i> est surtout du bruit de capteur : <code>rl_log</code> enregistre le <i>z</i> mesuré, celui que reçoit le contrôleur.</p>
+
+<h2>9. Mission de la Figure 1</h2>
+<p>La mission consiste à poser le drone à 0 m, monter à 0,5 m, puis descendre à −0,25 m. Le sujet ne donne pas les instants : le groupe a choisi des sauts à <strong>3 s et 7 s</strong>.</p>
+<p><strong>Faut-il réentraîner ?</strong> Non. Les observations de l'agent sont relatives (erreurs, vitesses) et les cibles d'entraînement couvraient des écarts jusqu'à 1,5 m, donc les sauts de +0,5 m et −0,75 m sont dans son domaine. Un test préalable en Python l'avait confirmé. Les adaptations, qui ne changent pas l'entraînement, sont les suivantes : <code>MISSION_FIG1</code> dans <code>drone_env.py</code>, un script <code>export_mission.py</code> qui réexporte <code>traj_model.mat</code>, et une fonction locale <code>consigne(t)</code> dans <code>rl_controller.m</code>.</p>
+<table>
+<caption>Niveau de bruit réaliste : comparaison avec les données réelles.</caption>
+<thead><tr><th></th><th>Bruit sur <i>a<sub>z</sub></i></th><th>Bruit sur <i>z</i></th></tr></thead>
+<tbody>
+<tr><td>Données réelles</td><td>0,044 m/s²</td><td>—</td></tr>
+<tr class="em"><td>Simulink, <code>g_noise</code> = 0,1</td><td>0,053 m/s²</td><td>0,005 m</td></tr>
+<tr><td>Simulink, <code>g_noise</code> = 0,2</td><td>0,10 m/s²</td><td>0,010 m</td></tr>
+</tbody></table>
+<table>
+<caption>Mission de la Figure 1 sur Simulink (10 vols à 0,1 ; 5 vols à 0,2 ; 1 vol sans bruit).</caption>
+<thead><tr><th><code>g_noise</code></th><th>RMSE / consigne lissée</th><th>Dépassement à 0,5 m</th><th><i>v<sub>z</sub></i> à l'arrivée au sol</th><th>Agitation de <i>u</i></th></tr></thead>
+<tbody>
+<tr><td>0</td><td>0,029 m</td><td>1 mm</td><td>−0,024 m/s</td><td>0,018</td></tr>
+<tr class="em"><td>0,1 (réaliste)</td><td>0,030 m</td><td>10 mm</td><td>−0,032 m/s</td><td>0,032</td></tr>
+<tr><td>0,2</td><td>0,031 m</td><td>18 mm</td><td>−0,033 m/s</td><td>0,046</td></tr>
+</tbody></table>
+<p>La RMSE par rapport aux paliers bruts vaut 0,21 m : elle est élevée parce qu'aucun drone ne peut sauter instantanément. Nous utilisons la consigne lissée comme référence et indiquons les deux valeurs.</p>
+<figure class="m"><img src="figures/mission_simulink.png" alt="Mission de la Figure 1 sur Simulink"><figcaption>Mission complète sur Simulink : dix vols bruités (orange) superposés au vol sans bruit (bleu), lui-même superposé au vol Python (gris). Avec un bruit réaliste, la commande ne varie que d'environ ±0,02 autour de 0,39.</figcaption></figure>
+<figure class="m"><img src="figures/mission_zooms.png" alt="Zoom sur la montée et l'atterrissage"><figcaption>Montée à 0,5 m (gauche) et atterrissage à −0,25 m (droite), avec les vitesses. L'atterrissage se fait à environ 3 cm/s, contre près de 1 m/s pour un échelon brut.</figcaption></figure>
+<p>L'atterrissage est doux sans terme dédié dans la récompense : la consigne lissée arrive à −0,25 m avec une vitesse nulle et l'agent suit aussi la vitesse de consigne. Cette douceur est réglable par τ sans réentraîner. Trois limites subsistent : un retard d'environ 0,15 s à chaque palier (les moteurs répondent en environ 0,2 s) ; une erreur statique de 6 mm au sol, que l'intégrale n'a pas le temps de corriger avant 10 s ; et un plongeon initial à −0,12 m, dû au départ en chute libre de Simulink.</p>
+
+<h1 class="part"><span>Partie III</span>Tâches avancées : lacet, déplacement en x et y, mission finale</h1>
+<p>La suite du projet ajoute une rotation autour de l'axe vertical (un tour complet à vitesse constante pour « scanner », à la place des 90° d'abord prévus), puis une avance en x. La mission élargie proposée est la suivante : drone posé de 0 à 2 s, montée à 0,5 m, tour complet à vitesse constante (ω ≈ 0,79 rad/s) entre 5 et 13 s, atterrissage à 15 s, soit un vol de 20 s. Cette partie présente les premières étapes ; elle est complétée au fil de l'avancement.</p>
+
+<h2>10. Étape A : interface du drone</h2>
+<p>Pour piloter le lacet, il faut connaître les sorties de <code>UAV_model</code>, leurs unités et la façon de mélanger les quatre moteurs. Un modèle Simulink de test, construit par script et jamais sauvegardé, fait tenir 0,5 m au LQI d'altitude puis ajoute des impulsions différentielles de 0,005 à 0,02 sur les moteurs, selon trois motifs, sans bruit.</p>
+
+<h3>10.1 Sorties et unités</h3>
+<ul>
+<li>Le modèle a quatre entrées (les moteurs) et dix-huit sorties nommées, dans l'ordre : <i>x y z v<sub>x</sub> v<sub>y</sub> v<sub>z</sub> φ θ ψ ω<sub>x</sub> ω<sub>y</sub> ω<sub>z</sub> a<sub>x</sub> a<sub>y</sub> a<sub>z</sub> ω̇<sub>x</sub> ω̇<sub>y</sub> ω̇<sub>z</sub></i>.</li>
+<li>Les unités sont SI, avec des angles en <strong>radians</strong>. Deux preuves : d<i>ψ</i>/d<i>t</i> = 1,000·<i>ω<sub>z</sub></i>, et <i>ẍ</i> ≈ <i>g</i>·<i>θ</i> (pour <i>θ</i> = −0,166 rad, on mesure <i>a<sub>x</sub></i>/<i>g</i> = −0,161).</li>
+<li>ψ n'est <strong>pas replié</strong> dans [−π ; π] : il atteint 28,6 rad (4,5 tours) de façon continue. Pour un tour complet, aucun modulo n'est donc nécessaire.</li>
+</ul>
+<div class="note warn"><span class="label">Piège</span><p>La sortie 19 (<code>all_outputs</code>) suit un <em>autre</em> ordre : <i>x y z v<sub>x</sub> v<sub>y</sub> v<sub>z</sub> a<sub>x</sub> a<sub>y</sub> a<sub>z</sub> φ θ ψ ω<sub>x</sub> ω<sub>y</sub> ω<sub>z</sub> ω̇<sub>x</sub> ω̇<sub>y</sub> ω̇<sub>z</sub></i>. Au premier essai, cela a conduit à lire <i>a<sub>z</sub></i> à la place de ψ.</p></div>
+
+<h3>10.2 Mélangeur des moteurs</h3>
+<p>Le drone est en configuration « + » : les moteurs 1 et 3 sont sur un axe, les moteurs 2 et 4 sur l'autre. Les quatre commandes sont obtenues à partir des commandes d'altitude (<i>u<sub>z</sub></i>), de lacet (<i>u<sub>ψ</sub></i>), de tangage (<i>u<sub>θ</sub></i>) et de roulis (<i>u<sub>φ</sub></i>) :</p>
+<div class="eq">u1 = u_z + u_ψ − u_θ        u2 = u_z − u_ψ + u_φ
+u3 = u_z + u_ψ + u_θ        u4 = u_z − u_ψ − u_φ</div>
+<table>
+<caption>Effet d'une impulsion différentielle selon le motif appliqué aux moteurs 1 à 4.</caption>
+<thead><tr><th>Axe</th><th>Motif (moteurs 1, 2, 3, 4)</th><th>Effet observé</th></tr></thead>
+<tbody>
+<tr><td>Lacet</td><td>(+, −, +, −)</td><td>+<i>ω<sub>z</sub></i></td></tr>
+<tr><td>Tangage</td><td>(−, 0, +, 0)</td><td>+<i>θ</i>, puis +<i>x</i> (<i>ẍ</i> ≈ +<i>g</i>·<i>θ</i>)</td></tr>
+<tr><td>Roulis</td><td>(0, +, 0, −)</td><td>+<i>φ</i>, puis −<i>y</i> (<i>ÿ</i> ≈ −<i>g</i>·<i>φ</i>)</td></tr>
+</tbody></table>
+<p>Les motifs diagonaux (+, +, −, −) et (+, −, −, +) donnent des rotations en diagonale, avec la même amplitude sur φ et θ : c'est ce qui révèle la configuration « + ».</p>
+<figure><img src="figures/interface_essais.png" alt="Réponses aux impulsions de lacet et aux impulsions diagonales"><figcaption>Gauche : après une impulsion de lacet de 1 s, ω<sub>z</sub> se stabilise à 3,45 rad/s et ψ croît ensuite linéairement jusqu'à 28,6 rad. Droite : les motifs diagonaux inclinent le drone de ±0,42 rad en φ et en θ, avec la même amplitude. Essais sans bruit.</figcaption></figure>
+
+<h3>10.3 Gain et conséquences pour l'apprentissage</h3>
+<ul>
+<li>Le gain vaut environ <strong>170 rad/s²</strong> par unité de commande différentielle, pour les trois axes (168 dans <code>ident_psi.m</code>).</li>
+<li>Le lacet n'a pas de frottement : après l'impulsion, <i>ω<sub>z</sub></i> reste constant (3,45 rad/s sur la figure ci-dessus).</li>
+<li>Les gains sont énormes : 0,01 de commande différentielle donne 1,7 rad/s². L'action de l'agent de lacet devra être mise à l'échelle (par exemple <i>u<sub>ψ</sub></i> = 0,05·<i>a</i>).</li>
+<li>Le niveau de bruit réaliste reste <code>g_noise</code> = 0,1 : il donne 0,053 m/s² sur <i>a<sub>z</sub></i> (données réelles : 0,044) et 0,005 m sur <i>z</i>, le bruit utilisé à l'entraînement.</li>
+</ul>
+
+<h2>11. Étape B1 : données et modèle du lacet</h2>
+<h3>11.1 Génération des données</h3>
+<p>Comme pour l'altitude, il faut des données pour identifier un modèle du lacet. Le LQI d'altitude fait tenir 0,5 m ; à partir de <i>t</i> = 3 s, le drone est excité pendant 60 s avec <i>u<sub>ψ</sub></i> = excitation − 0,006·<i>ω<sub>z</sub></i>. L'excitation est multi-niveaux : des niveaux uniformes dans ±<i>amp</i>, maintenus de 0,05 à 2 s, avec <i>amp</i> tirée entre 0,002 et 0,03 selon l'essai. Le petit amortissement ajouté (constante de temps d'environ 1 s) empêche <i>ω<sub>z</sub></i> de dériver, puisque le lacet est sans frottement.</p>
+<p>Le bruit est <code>g_noise</code> = 0,1. Il y a 150 essais de 60 s, soit 2,5 h de vol simulé, calculées en 72 s. Les données sont dans <code>donnees/lacet/donnees_lacet.mat</code>.</p>
+<h3>11.2 Contrôles des données</h3>
+<ul>
+<li><i>ω<sub>z</sub></i> atteint 4,6 rad/s, et reste sous 1 rad/s pendant 66 % du temps ;</li>
+<li>aucun moteur n'est saturé (maximum de <i>u<sub>z</sub></i> + <i>u<sub>ψ</sub></i> : 0,50) ;</li>
+<li>aucun couplage mesurable sur <i>z</i> : écart-type de 0,49 cm avec une faible excitation, 0,50 cm avec une forte, corrélation de −0,001 ;</li>
+<li>l'intégration de <i>ω̇<sub>z</sub></i> par trapèzes redonne <i>ω<sub>z</sub></i> (rapport 1,000) ;</li>
+<li>le retard est de 3 à 4 pas (0,15 à 0,2 s), la dynamique des moteurs, comme pour <i>z</i>.</li>
+</ul>
+<h3>11.3 Identification</h3>
+<p>Un GRU de 32 neurones, d'entrée <i>u<sub>ψ</sub></i>(<i>k</i>−1)/0,03 et de sortie <i>ω̇<sub>z</sub></i>/5, est comparé à un modèle linéaire ARX(2,6) identifié par moindres carrés. Le découpage se fait par essai (70 / 15 / 15), avec 3 graines et une évaluation en simulation libre (22 s d'entraînement sur GPU).</p>
+<table>
+<caption>Qualité des deux modèles de lacet sur l'ensemble de test (23 essais de 60 s en simulation libre). Pour comparaison, l'écart-type de <i>ω̇<sub>z</sub></i> vaut 1,25 rad/s².</caption>
+<thead><tr><th>Modèle</th><th>RMSE sur <i>ω̇<sub>z</sub></i></th><th>Dérive de <i>ω<sub>z</sub></i> en 10 s</th><th>Dérive de ψ en 10 s</th></tr></thead>
+<tbody>
+<tr><td>ARX(2,6)</td><td>0,0064 rad/s²</td><td>0,0045 rad/s</td><td>0,034 rad (1,9°)</td></tr>
+<tr><td>GRU (32 neurones)</td><td>0,0067 rad/s²</td><td>0,0071 rad/s</td><td>0,043 rad (2,5°)</td></tr>
+</tbody></table>
+<figure><img src="figures/lacet_test_sequence.png" alt="Essai de test du lacet en simulation libre sur 60 s"><figcaption>Un essai de test de 60 s en simulation libre : le modèle ne reçoit que <i>u<sub>ψ</sub></i>. L'accélération, la vitesse et l'angle de lacet (qui atteint −12 rad) sont superposés à la mesure pour le GRU et pour l'ARX.</figcaption></figure>
+<div class="note ok"><span class="label">Un lacet linéaire</span><p>Le gain est constant, de 172 à 173 rad/s² par unité, pour des impulsions de 0,003 à 0,03 et dans les deux sens. Le lacet est donc <em>linéaire</em>, contrairement à <i>z</i> qui suit un tangente hyperbolique, car c'est une petite variation autour du vol stationnaire. Trois méthodes indépendantes donnent ce gain : l'ARX (172,9), les impulsions (172,5) et <code>ident_psi.m</code> (168).</p></div>
+<p>Les coefficients de l'ARX (<i>a</i> = [0,413 ; 0,285], <i>b</i> = [38,3 ; 14,0 ; ≈ 0 ; …]) serviront à concevoir par <code>dlqr</code> un régulateur de lacet à 20 Hz, comme référence linéaire. Le choix du modèle pour l'environnement de lacet (GRU ou ARX) est en cours ; le GRU est recommandé par cohérence avec l'altitude.</p>
+
+<h2>12. Étape B2 : agent de lacet et vol sur Simulink</h2>
+<p>La chaîne utilisée pour l'altitude (données, GRU, environnement, PPO, export, vérification, Simulink) est reprise telle quelle pour le lacet, soit environ 30 minutes de calcul au total.</p>
+
+<h3>12.1 Modèle et environnement</h3>
+<ul>
+<li><strong>Modèle</strong> : le GRU de lacet, choisi par cohérence avec l'altitude (l'ARX est aussi précis). Au repos, sa dérive de ψ est négligeable : 0,009 rad en 20 s pour <i>u</i> = 0.</li>
+<li><strong>Bruit</strong> mesuré à <code>g_noise</code> = 0,1 sur les données de lacet : 0,0045 rad sur ψ, 0,0046 rad/s sur <i>ω<sub>z</sub></i>, 0,042 rad/s² sur <i>ω̇<sub>z</sub></i>. L'entraînement utilise 0,005 ; 0,005 ; 0,05.</li>
+<li><strong>Environnement</strong> <code>YawEnv</code> (<code>yaw_env.py</code>), de même structure que <code>DroneEnv</code> : action <i>a</i> ∈ [−1 ; 1] avec <i>u<sub>ψ</sub></i> = 0,03·<i>a</i> (jusqu'à environ 5 rad/s²), GRU puis intégration par trapèzes (<i>ω̇<sub>z</sub></i>, <i>ω<sub>z</sub></i>, ψ), vol de 400 pas (20 s).</li>
+</ul>
+<p>La consigne est une suite de <strong>sauts de vitesse de lacet</strong>, chacun lissé par un 2<sup>e</sup> ordre critique (τ = 0,35 s). Les formules sont fermées, et ψ<sub>ref</sub> est l'intégrale exacte de <i>ω</i><sub>ref</sub> :</p>
+<div class="eq">ω_ref(t) = Σ Δω_i · [ 1 − (1 + x/τ)·exp(−x/τ) ]            x = t − t_i
+ψ_ref(t) = Σ Δω_i · S(x),     S(x) = x − 2τ + (x + 2τ)·exp(−x/τ)</div>
+<p>La mission du scan est une vitesse de 2π/8 ≈ 0,785 rad/s entre 5 et 13 s, d'où ψ<sub>ref</sub>(20 s) = 2π exactement. L'entraînement se fait sur des missions aléatoires : 1 à 4 sauts de vitesse, au moins 1 s d'écart, 40 % de retours à l'arrêt, sinon une vitesse dans ±1,5 rad/s.</p>
+<p>L'observation compte six grandeurs : (ψ<sub>ref</sub> − ψ)/0,5, <i>ω<sub>z</sub></i>, <i>ω̇<sub>z</sub></i><sub>,prev</sub>/5, l'action précédente, l'intégrale conditionnelle (|<i>e</i>| &lt; 0,1 rad, borne 0,5) divisée par 0,5, et <i>ω</i><sub>ref</sub> − <i>ω<sub>z</sub></i>. La récompense a la même forme que pour l'altitude, avec des échelles en radians :</p>
+<div class="eq">r =  0,5·exp(−(e/0,03)²) + 0,5·exp(−(e/0,3)²) − 0,2·min(|e|, 1)
+   − 0,2·(1 − exp(−(e_v/0,3)²)) − 3·Δa²</div>
+<p>Les tests de l'environnement réussissent tous : <code>check_env</code> ; impulsion <i>a</i> = 0,5 pendant 1 s donnant <i>ω<sub>z</sub></i> = 2,584 rad/s (attendu 2,58), constant ensuite ; écart de 1,7·10<sup>−4</sup> rad entre ψ<sub>ref</sub> et l'intégrale numérique de <i>ω</i><sub>ref</sub> (erreur des trapèzes) ; ψ<sub>ref</sub>(20 s) = 6,28319 ; observation identique à une réplique écrite à la main.</p>
+
+<h3>12.2 Référence linéaire et entraînement</h3>
+<p>Le LQI de lacet de <code>ident_psi.m</code> (<i>K</i><sub>p</sub> = 0,252 ; <i>K</i><sub>d</sub> = 0,125 ; <i>K</i><sub>i</sub> = 0,097) sert de référence. Sur le scan, en Python, il atteint une RMSE de 0,131 rad avec un <strong>dépassement de 0,27 rad (15°)</strong> après l'arrêt de la rotation : pendant la rampe, l'erreur de traînage charge l'intégrale, qui fait dépasser à l'arrêt. Diviser les gains par 2 donne le même résultat.</p>
+<p>L'agent est entraîné par PPO, avec 16 drones en parallèle, <i>n</i><sub>steps</sub> = 512, des lots de 1024, un réseau 64×64 et un bruit d'entraînement : 1 million de transitions en 3,6 minutes (environ 4 700 transitions par seconde). Le meilleur agent est obtenu à 500 000 transitions, puis la courbe reste sur un plateau.</p>
+<table>
+<caption>Évaluation sans bruit, sur 20 missions aléatoires fixes et sur le scan (modèle Python).</caption>
+<thead><tr><th>Contrôleur</th><th>Rendement</th><th>RMSE (20 missions)</th><th>Erreur max</th><th>Scan : RMSE</th><th>Scan : erreur max</th></tr></thead>
+<tbody>
+<tr class="em"><td>Agent PPO de lacet</td><td>380,6</td><td>0,0142 rad</td><td>0,066 rad</td><td>0,0116 rad</td><td>0,046 rad</td></tr>
+<tr><td>LQI de lacet</td><td>263,8</td><td>0,137 rad</td><td>0,366 rad</td><td>0,131 rad</td><td>0,270 rad</td></tr>
+</tbody></table>
+<p>Avec bruit (5 vols du scan), l'agent garde une RMSE de 0,0118 rad avec une agitation de la commande de 0,035, contre 0,131 rad et 0,073 pour le LQI.</p>
+<figure class="m"><img src="figures/lacet_ppo_courbe_apprentissage.png" alt="Courbe d'apprentissage de l'agent de lacet"><figcaption>Apprentissage de l'agent de lacet : le rendement dépasse celui du LQI dès 200 000 transitions et la RMSE passe nettement sous la ligne du LQI (échelle logarithmique).</figcaption></figure>
+<figure><img src="figures/lacet_ppo_vols.png" alt="Scan et mission aléatoire, agent contre LQI"><figcaption>Scan (gauche) et mission aléatoire (droite), agent contre LQI : angle, erreur, commande, puis commande de l'agent avec bruit. Le LQI dépasse de 0,27 rad à l'arrêt ; l'agent suit la vitesse de consigne et reste à moins de 0,05 rad.</figcaption></figure>
+<div class="note ok"><span class="label">Pourquoi l'agent est meilleur sur une rampe</span><p>Le LQI accumule l'erreur de traînage dans son intégrale et dépasse de 15° à l'arrêt. L'agent suit la vitesse de consigne (observation <i>ω</i><sub>ref</sub> − <i>ω<sub>z</sub></i>) et n'utilise l'intégrale que près de la consigne, grâce à l'intégration conditionnelle.</p></div>
+
+<h3>12.3 Vol sur Simulink : altitude et lacet ensemble</h3>
+<p>Une nouvelle boucle <code>EINT_RL_closed_loop_zpsi.slx</code> est créée par script, sans toucher aux fichiers fournis de <code>rl_interface/</code> : les dix-huit sorties nommées passent par un échantillonneur à 50 ms, puis par un contrôleur <code>rl_controller_zpsi</code> qui calcule les quatre moteurs. Le contrôleur applique les deux politiques (<code>policy_z</code> et <code>policy_psi</code>) et le mélangeur de la section 10 :</p>
+<div class="eq">u_i = u_z + 0,03 · a_ψ · (+1, −1, +1, −1)</div>
+<p>Il garde les valeurs du pas précédent (<i>a<sub>z</sub></i>, <i>ω̇<sub>z</sub></i>, <i>u<sub>z</sub></i>, <i>a<sub>ψ</sub></i>), nulles au premier pas comme les <code>UnitDelay</code>. La mission d'altitude (<code>MISSION_AVANCEE_Z</code>) monte à 0,5 m à partir de 2 s et atterrit à 15 s, pour un vol de 20 s, avec le scan de ψ entre 5 et 13 s. L'agent d'altitude est inchangé ; seule sa consigne change. L'export est assuré par <code>export_avance.py</code>.</p>
+<p><strong>Vérifications.</strong> « Vérification OK » : le contrôleur MATLAB et Python coïncident sur 400 pas (consignes à 1e-9, observations à 1e-5, commandes à 1e-4). Le rejeu hors ligne des mesures de chaque vol redonne exactement les commandes (écart 0) : le contrôleur est appelé une seule fois par pas.</p>
+<table>
+<caption>Vols Simulink : 1 vol sans bruit et 5 vols à <code>g_noise</code> = 0,1 (moyennes).</caption>
+<thead><tr><th>Cas</th><th>RMSE <i>z</i></th><th>RMSE ψ</th><th>Erreur ψ max</th><th>Erreur ψ pendant le scan (6–12 s)</th><th><i>z</i> pendant le scan</th><th><i>v<sub>z</sub></i> au sol</th></tr></thead>
+<tbody>
+<tr><td>Sans bruit</td><td>0,0208 m</td><td>0,0116 rad</td><td>2,65°</td><td>0,39°</td><td>0,5015 m (σ 0,00 cm)</td><td>−0,023 m/s</td></tr>
+<tr class="em"><td><code>g_noise</code> = 0,1</td><td>0,0213 m</td><td>0,0125 rad</td><td>3,04°</td><td>0,48°</td><td>0,5016 m (σ 0,47 cm)</td><td>−0,040 m/s</td></tr>
+</tbody></table>
+<figure><img src="figures/mission_avance_simulink.png" alt="Agents z et lacet sur Simulink : altitude, angle de lacet, erreur et moteurs"><figcaption>Mission avancée sur Simulink : décollage, tour complet de 5 à 13 s (zone verte), atterrissage. De haut en bas : altitude, angle de lacet, erreur de ψ en degrés, et les quatre moteurs. Le scan ne perturbe pas l'altitude ; la commande différentielle de lacet (environ ±0,01) est invisible sur le tracé des moteurs.</figcaption></figure>
+<p>L'angle final vaut 6,275 à 6,287 rad pour un objectif de 2π ≈ 6,283. L'écart entre Simulink et Python sans bruit est au plus de 1,4 cm sur <i>z</i> et de 0,0003 rad sur ψ : le GRU de lacet est quasi exact. Les erreurs maximales (environ 2,5°) apparaissent au début et à la fin de la rotation et correspondent au retard des moteurs d'environ 0,2 s, comme pour l'altitude ; le reste du temps, l'erreur est inférieure à 0,5°.</p>
+
+<h2>13. Étape C1 : attitude (tangage et roulis)</h2>
+<p>Pour avancer en <i>x</i>, il faut incliner le drone : une boucle interne d'attitude (C1, méthode classique) reçoit un angle de consigne, et une boucle externe par apprentissage (C2) commandera cet angle à partir de la position en <i>x</i>. Cette étape suit le même enchaînement que le lacet : données, modèle, régulateur, validation sur Simulink.</p>
+
+<h3>13.1 La sortie θ du simulateur est inutilisable</h3>
+<div class="note"><span class="label">Bruit anormal sur θ</span><p>Dans <code>UAV_model.slx</code>, le bloc de bruit de θ (« Band-Limited White Noise7 ») a pour covariance <code>seed_theta</code> au lieu de 0,0001 comme les 17 autres sorties. Or <code>random_init.m</code> tire <code>seed_theta</code> entre 1 et 10 000. Le bruit de θ a donc un écart-type d'environ 30 rad à <code>g_noise</code> = 0,1 (30,8 rad mesurés sur 150 essais), et encore environ 3 rad à 0,01. Un premier PD bouclé sur cette sortie a retourné le drone dès le décollage.</p></div>
+<p>Le simulateur n'est pas modifié : <i>θ</i> est <strong>estimé en intégrant <i>ω<sub>y</sub></i></strong> par trapèzes. Le bruit de <i>ω<sub>y</sub></i> est d'environ 0,005 rad/s, soit une dérive d'environ 0,005 rad en 20 s. Vérification : <i>a<sub>x</sub></i> = 9,96·<i>θ</i><sub>est</sub> (<i>g</i> = 9,81), avec un résidu de 0,027 m/s².</p>
+
+<div class="note ok"><span class="label">Corrigé depuis</span><p>Nous avons corrigé ce bloc de bruit (covariance de 0,0001) : θ se mesure maintenant directement. L'estimation par intégration de <i>ω<sub>y</sub></i> a servi aux données et aux essais de cette section, mais plus à partir de l'étape C2.</p></div>
+
+<h3>13.2 Données</h3>
+<p>150 essais de 60 s, <code>g_noise</code> = 0,1 (<code>gen_donnees_attitude.m</code>, <code>ctrl_attitude.m</code>). Le drone tient <i>z</i> = 0,5 m (LQI) et ψ = 0 (PD). Les commandes <i>u<sub>θ</sub></i> et <i>u<sub>φ</sub></i> sont excitées <strong>simultanément et indépendamment</strong> (multi-niveaux, |<i>u</i>| ≤ 0,006, paliers de 0,05 à 2 s), avec un PD faible sur chaque angle (<i>K</i><sub>ang</sub> = 0,0235 ; <i>K<sub>w</sub></i> = 0,0165) pour empêcher la dérive. Les angles restent sous 0,28 rad. Le fichier <code>donnees/attitude/donnees_attitude.mat</code> pèse 30 Mo. Le mélangeur, vérifié, est <i>u<sub>θ</sub></i> = (<i>u</i><sub>3</sub> − <i>u</i><sub>1</sub>)/2 et <i>u<sub>φ</sub></i> = (<i>u</i><sub>2</sub> − <i>u</i><sub>4</sub>)/2 : +<i>u<sub>θ</sub></i> donne +θ et +<i>u<sub>φ</sub></i> donne +φ.</p>
+
+<h3>13.3 Identification</h3>
+<p>Comme pour le lacet, où l'ARX valait le GRU, un modèle ARX(2,6) est identifié pour chaque axe (<code>identification_attitude.py</code>), de la commande vers l'accélération angulaire.</p>
+<table>
+<caption>Modèles ARX(2,6) d'attitude, évalués en simulation libre sur 23 essais de test.</caption>
+<thead><tr><th>Axe</th><th>Gain statique</th><th>RMSE sur l'accélération angulaire</th><th>Dérive de <i>ω</i> / de l'angle en 10 s</th></tr></thead>
+<tbody>
+<tr><td>Tangage : <i>u<sub>θ</sub></i> → <i>ω̇<sub>y</sub></i></td><td>171,8 rad/s²</td><td>0,0046 rad/s²</td><td>0,0035 rad/s ; 0,023 rad</td></tr>
+<tr><td>Roulis : <i>u<sub>φ</sub></i> → <i>ω̇<sub>x</sub></i></td><td>171,8 rad/s²</td><td>0,0047 rad/s²</td><td>0,0039 rad/s ; 0,024 rad</td></tr>
+</tbody></table>
+<p>La RMSE de 0,0046 rad/s² correspond au niveau du bruit de mesure de <i>ω̇</i> (environ 0,0047), pour une sortie d'écart-type 0,238 : le modèle ne laisse pas de résidu exploitable. Les pôles 0,775 et −0,468 traduisent un retard moteur du premier ordre d'environ 0,2 s (0,775 = e<sup>−0,05/0,197</sup>). Le <strong>gain et la dynamique sont les mêmes que pour le lacet</strong> (172 rad/s²). Le couplage entre axes est nul (0,01 % du gain direct).</p>
+<figure class="m"><img src="figures/attitude_arx_test.png" alt="Essai de test du tangage : mesure et ARX"><figcaption>Un essai de test en simulation libre : le modèle ARX ne reçoit que la commande et reproduit l'accélération, la vitesse et l'angle mesurés.</figcaption></figure>
+<p><strong>Modèle de translation (pour C2).</strong> <i>a<sub>x</sub></i> = +9,907·θ + 0,0024·<i>v<sub>x</sub></i> (résidu 0,052 m/s²) et <i>a<sub>y</sub></i> = −9,911·φ (résidu 0,046 m/s²) : il n'y a pas de frottement mesurable, la translation est un double intégrateur commandé par l'angle.</p>
+
+<h3>13.4 Régulateur d'attitude</h3>
+<p>L'état est de dimension 9 : [angle − réf, <i>ω</i>, <i>ω̇</i>(<i>k</i>), <i>ω̇</i>(<i>k</i>−1), <i>u</i>(<i>k</i>−1 à <i>k</i>−5)]. Tout est mesuré ou mémorisé, donc sans observateur ; le même gain <i>K</i> sert pour θ et φ. La dynamique de <i>ω</i> et de l'angle est obtenue par trapèzes à partir de l'ARX, et <i>K</i> par <code>dlqr</code> (<code>lqi_attitude.m</code>). Trois variantes sont comparées sur un échelon de 0,1 rad, sur le modèle ARX :</p>
+<table>
+<caption>Échelon de 0,1 rad en boucle fermée (modèle ARX).</caption>
+<thead><tr><th>Régulateur</th><th>Montée</th><th>Dépassement</th><th>Stabilisation à 2 %</th></tr></thead>
+<tbody>
+<tr><td>LQI classique (<i>q</i> = 100 / 5 / 20, <i>R</i> = 5·10<sup>4</sup>)</td><td>0,65 s</td><td>25 %</td><td>7,0 s</td></tr>
+<tr><td>LQI conditionnel (intégrale seulement si |<i>e</i>| &lt; 0,02 rad)</td><td>0,75 s</td><td>5,2 %</td><td>2,2 s</td></tr>
+<tr class="em"><td>LQ sans intégrale, <strong>retenu</strong> (<i>q</i><sub>ang</sub> = 100, <i>q<sub>w</sub></i> = 10, <i>R</i> = 2·10<sup>4</sup>)</td><td>0,85 s</td><td>0,4 %</td><td>1,45 s</td></tr>
+</tbody></table>
+<figure class="m"><img src="figures/lqi_attitude_echelons.png" alt="Échelons de 0,1 rad pour les trois régulateurs"><figcaption>Réponses à un échelon de 0,1 rad pour les trois régulateurs : le LQ sans intégrale est le plus propre.</figcaption></figure>
+<div class="note ok"><span class="label">Pourquoi pas d'intégrale</span><p>L'identification ne montre aucun couple parasite : <i>u</i> = 0 donne <i>ω̇</i> = 0, et sans bruit l'attitude reste exactement à 0. L'intégrale n'a donc rien à compenser et ne fait que créer du dépassement, le même phénomène que pour le LQI de lacet (15°).</p></div>
+<p>Le gain retenu est <i>K</i> = [0,061991 ; 0,042637 ; 0,0036989 ; 0,0015518 ; 0,078459 ; 0,0019356 ; 0,0015677 ; 0,0013773 ; 0,0010012], avec des pôles de module au plus 0,855 et |<i>u</i>| maximal de 0,0062 sur l'échelon.</p>
+
+<h3>13.5 Validation sur Simulink</h3>
+<p>Le drone décolle à 0,5 m, ψ est tenu à 0 et les consignes sont des échelons : θ de 0 à 0,1 (3 s), −0,1 (5 s) puis 0 (7 s) ; φ de 0 à 0,1 (4 s), 0 (6 s) puis −0,05 (8 s). L'écart entre Simulink et la <strong>prédiction de l'ARX en boucle fermée</strong> est :</p>
+<table>
+<caption>Écart RMS entre Simulink et la prédiction de l'ARX en boucle fermée.</caption>
+<thead><tr><th>Cas</th><th>θ</th><th>φ</th></tr></thead>
+<tbody>
+<tr><td>Sans bruit</td><td>0,0001 rad</td><td>0,0001 rad</td></tr>
+<tr class="em"><td><code>g_noise</code> = 0,1</td><td>0,0005 rad</td><td>0,0053 rad (bruit de mesure de φ)</td></tr>
+</tbody></table>
+<figure class="s"><img src="figures/lqi_attitude_vol.png" alt="Vol Simulink avec échelons de tangage et de roulis"><figcaption>Vol Simulink avec les échelons de tangage et de roulis : l'angle suit la consigne et le modèle ARX.</figcaption></figure>
+<p>L'altitude reste dans [0,49 ; 0,59] m et |ψ| ne dépasse pas 0,012 rad. Effet sur la translation, qui sera la cascade de C2 : l'impulsion de θ (+0,1 puis −0,1) déplace le drone de +4 m en <i>x</i> puis l'arrête ; +φ le fait partir en −<i>y</i> (8 m en 4 s). Le creux de <i>z</i> à −0,22 m au décollage vient du LQI d'altitude simplifié (gains ÷ 2) utilisé pour ces essais ; en C2, <i>z</i> sera tenu par l'agent PPO.</p>
+
+<h2>14. Cascade en x et atterrissage sur une voiture mobile</h2>
+<p>Nous avons d'abord conçu une commande en cascade pour avancer en <i>x</i> (<code>commande_LQ/test_LQI_x.slx</code>, gains dans <code>gains_LQI.m</code>), puis rassemblé tous les contrôleurs classiques dans une mission complète (<code>commande_LQ/mission_LQ/</code>) : décollage, tour sur soi-même, poursuite puis atterrissage sur une voiture qui roule. Cette cascade sert aussi de <strong>référence pour l'étape C2</strong>, où un agent PPO fournira <i>θ</i><sub>ref</sub> à la place du régulateur de <i>x</i>.</p>
+
+<h3>14.1 Principe : deux boucles imbriquées</h3>
+<p>Le drone avance en <i>x</i> en s'inclinant en tangage : la poussée inclinée de θ donne <i>ẍ</i> ≈ <i>g</i>·θ. La boucle <strong>interne</strong> fait suivre <i>θ</i><sub>ref</sub> à θ ; la boucle <strong>externe</strong> calcule <i>θ</i><sub>ref</sub> à partir de l'erreur de position en <i>x</i>.</p>
+
+<h3>14.2 Boucle interne sur θ</h3>
+<p>Le modèle est un double intégrateur <i>θ̈</i> = <i>k<sub>θ</sub></i>·<i>u<sub>θ</sub></i>, avec <i>k<sub>θ</sub></i> = 2,93·180/3,14 = 167,96 rad/s² : le même gain que le lacet, cohérent avec l'ARX de l'étape C1 (171,8). La commande différentielle <i>u<sub>θ</sub></i> s'ajoute au moteur 3 et se retranche au moteur 1 (mélangeur « + ») ; elle n'agit que sur θ. Les moteurs 2 et 4 sont sur l'axe de tangage (bras de levier nul), les couples de réaction de 1 et 3 se compensent (pas de ψ) et la poussée totale ne change pas (pas de <i>z</i>).</p>
+<p>Le modèle d'état [θ ; <i>θ̇</i>] est discrétisé par blocage d'ordre zéro à <i>T<sub>s</sub></i> = 0,05 s et augmenté de l'intégrale de l'erreur. <code>dlqr</code> avec <i>Q</i> = diag(150, 15, 100) et <i>R</i> = 1 donne <i>K</i><sub>p</sub> = 0,44256 ; <i>K</i><sub>d</sub> = 0,1297 ; <i>K</i><sub>i</sub> = 0,2795, soit la loi :</p>
+<div class="eq">u_θ = Kp_θ·(θ_ref − θ) − Kd_θ·ω_y + Ki_θ·∫(θ_ref − θ)</div>
+<p>Le terme dérivé utilise la vitesse angulaire <strong>mesurée</strong> <i>ω<sub>y</sub></i>, pas la dérivée d'un signal bruité, et l'intégrateur est borné. L'altitude est tenue pendant le mouvement par le PID de <i>z</i> de <code>LQI.m</code> plus une compensation de poussée 0,39/cos θ, filtrée et saturée dans [0,3 ; 0,5] : quand le drone penche, la composante verticale de la poussée baisse en cos θ, on l'augmente d'autant.</p>
+
+<h3>14.3 Boucle externe sur x : un PD</h3>
+<div class="eq">θ_ref = Kp_x·(x_ref − x) − Kd_x·vx          saturé à ±0,2 rad</div>
+<p>La saturation fixe l'inclinaison maximale, donc l'accélération maximale : 9,81 × 0,2 ≈ 2 m/s². Un PD suffit, et non un PID, parce que la translation identifiée à l'étape C1 est <i>a<sub>x</sub></i> = 9,907·θ + 0,0024·<i>v<sub>x</sub></i> (résidu 0,052 m/s²) : le frottement est négligeable et <i>x</i> est un double intégrateur pur. Sans perturbation constante (ni vent ni frottement dans le simulateur), l'erreur statique est nulle sans intégrale ; mesurée, elle est inférieure à 5 mm. Une intégrale n'aurait rien à compenser et ajouterait du dépassement, comme pour l'attitude (25 % avec, 0,4 % sans). Le terme <i>K<sub>d</sub></i> utilise <i>v<sub>x</sub></i> mesurée : c'est un amortissement.</p>
+
+<h3>14.4 Choix des gains par un modèle du second ordre</h3>
+<p>Si la boucle θ est assez rapide (θ ≈ <i>θ</i><sub>ref</sub>), alors <i>ẍ</i> = <i>g</i>·<i>K</i><sub>p,x</sub>·(<i>x</i><sub>ref</sub> − <i>x</i>) − <i>g</i>·<i>K</i><sub>d,x</sub>·<i>ẋ</i>, un second ordre standard avec</p>
+<div class="eq">ω_n = √(g·Kp_x)          ζ = g·Kd_x / (2·ω_n)</div>
+<p>La boucle externe doit être 3 à 5 fois plus lente que l'interne. θ répond avec une dynamique d'environ 5 rad/s (retard moteur d'environ 0,2 s), d'où les cibles <i>ω<sub>n</sub></i> ≈ 1,5 rad/s et ζ ≈ 0,9 : <i>K</i><sub>p,x</sub> = 2,25/9,81 ≈ 0,23 et <i>K</i><sub>d,x</sub> = 2,7/9,81 ≈ 0,28. Vérification sur Simulink avec un échelon <i>x</i><sub>ref</sub> = 1 m à <i>t</i> = 4 s, <i>z</i> tenu, <code>g_noise</code> = 0 (entre parenthèses : 0,1).</p>
+<table>
+<caption>Balayage des gains de la boucle <i>x</i> sur un échelon de 1 m.</caption>
+<thead><tr><th><i>K</i><sub>p,x</sub></th><th><i>K</i><sub>d,x</sub></th><th><i>ω<sub>n</sub></i></th><th>ζ</th><th>Montée 10–90 %</th><th>Dépassement</th><th>Stabilisation à 2 %</th><th><i>θ</i><sub>ref</sub> saturé</th></tr></thead>
+<tbody>
+<tr><td>0,10</td><td>0,30 (premier réglage)</td><td>0,99</td><td>1,49</td><td>5,8 s</td><td>0 %</td><td>10,6 s (15,6 s)</td><td>0 % du temps</td></tr>
+<tr class="em"><td>0,23</td><td>0,28 (<strong>retenu</strong>)</td><td>1,50</td><td>0,91</td><td>2,1 s (1,6 s)</td><td>0,5 % (1,0 %)</td><td>3,6 s (3,7 s)</td><td>2 %</td></tr>
+<tr><td>0,41</td><td>0,33</td><td>2,01</td><td>0,81</td><td>0,8 s</td><td>6,5 %</td><td>4,0 s</td><td>6 %</td></tr>
+<tr><td>0,41</td><td>0,26</td><td>2,01</td><td>0,64</td><td>0,7 s</td><td>29 %</td><td>6,7 s</td><td>8 %</td></tr>
+<tr><td>0,64</td><td>0,41</td><td>2,51</td><td>0,80</td><td>0,7 s</td><td>29 %</td><td>6,2 s</td><td>12 %</td></tr>
+</tbody></table>
+<figure class="m"><img src="figures/cascade_x_gains.png" alt="Temps de stabilisation et dépassement selon les gains de x"><figcaption>Temps de stabilisation et dépassement pour les cinq réglages du tableau (sans bruit). Le réglage retenu est en bleu.</figcaption></figure>
+<div class="note ok"><span class="label">La limite vient de l'inclinaison</span><p>Le réglage retenu est trois fois plus rapide que le premier (3,6 s contre 10,6 s), sans dépassement notable et insensible au bruit : l'erreur finale est de 5 mm sans bruit et de 1,5 mm avec. Au-delà de <i>ω<sub>n</sub></i> ≈ 2 rad/s, monter les gains ne sert plus : <i>θ</i><sub>ref</sub> sature, l'accélération est plafonnée à environ 2 m/s², le second ordre linéaire ne décrit plus le système et le dépassement atteint 29 %.</p></div>
+
+<h3>14.5 Mission d'atterrissage sur une voiture mobile</h3>
+<p>Tous les contrôleurs LQ sont réunis dans <code>mission_LQ.slx</code> : LQI de <i>z</i> (<i>K</i><sub>p</sub> = 1,856 ; <i>K</i><sub>d</sub> = 0,882 ; <i>K</i><sub>i</sub> = 0,787) avec un terme de vol stationnaire 0,39/(cos θ·cos φ) saturé entre 0,35 et 0,41, LQI de ψ (0,252 ; 0,125 ; 0,097), LQI de θ et de φ (0,443 ; 0,130 ; 0,280), PD de <i>x</i> et de <i>y</i> (0,23 ; 0,28) qui donnent <i>θ</i><sub>ref</sub> et <i>φ</i><sub>ref</sub> saturés à ±0,2 rad (signe inversé pour φ, car +φ donne −<i>y</i>), et le mélangeur « + » :</p>
+<div class="eq">u1 = u + u_ψ − u_θ     u2 = u − u_ψ + u_φ
+u3 = u + u_ψ + u_θ     u4 = u − u_ψ − u_φ</div>
+<p>L'objectif est de monter à 0,5 m, de faire un tour complet à vitesse constante (le scan), puis de se poser sur la voiture, qui a avancé entre-temps : mouvement rectiligne uniforme <i>x<sub>v</sub></i>(<i>t</i>) = 1 + 0,3·<i>t</i>, hauteur <i>h<sub>v</sub></i> = 0. Les fichiers originaux ne sont pas modifiés ; la nouvelle version est dans <code>commande_LQ/mission_LQ/</code> (<code>mission_LQ.slx</code>), avec trois ajouts.</p>
+
+<p><strong>Ajout 1 : un séquenceur de mission.</strong> Un bloc MATLAB Function discret (<i>T<sub>s</sub></i> = 0,05 s), en machine à états, alimente les références <i>x</i>, <i>y</i>, <i>z</i>, ψ et une nouvelle vitesse de consigne <i>vx</i><sub>ref</sub>.</p>
+<ol>
+<li><strong>Décollage</strong> : <i>z</i><sub>ref</sub> en rampe de 0 à 0,5 m sur 5 s.</li>
+<li><strong>Scan</strong> dès 5 s : ψ<sub>ref</sub> = 2π(<i>t</i> − 5)/10 (0,63 rad/s), puis maintien à 2π, sans retour à 0 (le drone referait un tour à l'envers).</li>
+<li><strong>Poursuite</strong> dès 15 s : approche « critique » <i>x</i><sub>ref</sub> = <i>x<sub>v</sub></i> − <i>d</i><sub>0</sub>(1 + <i>s</i>)·e<sup>−<i>s</i></sup> et <i>vx</i><sub>ref</sub> = <i>v<sub>v</sub></i> + (<i>d</i><sub>0</sub>/<i>T</i>)·<i>s</i>·e<sup>−<i>s</i></sup>, avec <i>s</i> = (<i>t</i> − <i>t</i><sub>3</sub>)/<i>T</i>, <i>T</i> = 3 s et <i>d</i><sub>0</sub> = 5,5 m l'écart drone-voiture en <i>t</i><sub>3</sub>.</li>
+<li><strong>Descente</strong>, déclenchée quand |<i>x</i> − <i>x<sub>v</sub></i>| &lt; 5 cm et |<i>vx</i> − <i>v<sub>v</sub></i>| &lt; 5 cm/s pendant 1 s : <i>z</i><sub>ref</sub> descend à 0,1 m/s jusqu'à <i>h<sub>v</sub></i>, en suivant toujours la voiture.</li>
+<li><strong>Posé</strong> quand <i>z</i> − <i>h<sub>v</sub></i> &lt; 2 cm.</li>
+</ol>
+<p>Ce profil part exactement de la position du drone avec une vitesse relative nulle, puis converge sans dépassement. L'accélération maximale demandée, <i>d</i><sub>0</sub>/<i>T</i>² ≈ 0,6 m/s², reste bien sous la limite de θ<sub>max</sub> = 0,2 rad (environ 2 m/s²). Un échelon de 5,5 m aurait saturé θ et donné environ 30 % de dépassement, comme dans le balayage précédent.</p>
+
+<p><strong>Ajout 2 : anticipation de vitesse dans la boucle <i>x</i>.</strong> La loi devient <i>θ</i><sub>ref</sub> = <i>K</i><sub>p</sub>(<i>x</i><sub>ref</sub> − <i>x</i>) + <i>K</i><sub>d</sub>(<i>vx</i><sub>ref</sub> − <i>vx</i>), au lieu de −<i>K</i><sub>d</sub>·<i>vx</i>. Le drone n'a presque pas de traînée : tenir une vitesse constante ne demande aucune inclinaison, et un PD qui freine sur <i>vx</i> ne peut être équilibré que par une erreur de position. Il reste une erreur de traînage <i>K</i><sub>d</sub>·<i>v</i>/<i>K</i><sub>p</sub> ≈ 1,2·<i>v</i>, soit 36 cm derrière la voiture à 0,3 m/s. Donner la vitesse de consigne annule cette erreur.</p>
+
+<p><strong>Ajout 3 : rotation par ψ des commandes <i>x</i> et <i>y</i>.</strong> Les PD calculent leur commande dans le repère monde, alors que θ et φ inclinent le drone dans son propre repère. Un bloc applique une rotation d'angle ψ avant les saturations : avec <i>c<sub>x</sub></i> = θ<sub>w</sub> et <i>c<sub>y</sub></i> = −φ<sub>w</sub>,</p>
+<div class="eq">θ_ref = cos ψ·c_x + sin ψ·c_y
+φ_ref = −( −sin ψ·c_x + cos ψ·c_y )</div>
+<div class="note"><span class="label">Un défaut invisible sans bruit</span><p>Sans cette rotation, la mission marchait parfaitement sans bruit mais dérivait fortement dès <code>g_noise</code> = 0,01 : 10 m en <i>x</i> et 16 m en <i>y</i> pendant le scan, jusqu'à 39 m à 0,1. À ψ ≈ π, un θ positif fait reculer le drone en <i>x</i> monde et la boucle <i>x</i> devient une rétroaction positive. Sans bruit l'erreur reste exactement nulle, donc l'instabilité ne se voit pas ; le moindre bruit la déclenche. Avec la rotation, la dérive pendant le scan reste sous 2 cm.</p></div>
+<p>Un essai a été écarté : remplacer θ et φ par ∫<i>ω<sub>y</sub></i> et ∫<i>ω<sub>x</sub></i> (méthode de l'étape C1). C'est inutile ici et légèrement moins bon : à <code>g_noise</code> = 0,1, l'écart au posé passe à 3,6 cm au lieu de 1,3 cm, car l'intégrale du gyroscope dérive. La correction utile était la rotation, pas l'estimateur.</p>
+
+<h3>14.6 Résultats</h3>
+<table>
+<caption>Mission complète sur Simulink (simulation de 50 s).</caption>
+<thead><tr><th><code>g_noise</code></th><th>Posé à</th><th>Écart en <i>x</i> drone − voiture</th><th>Écart en <i>y</i></th><th>Vitesse relative</th><th>Dérive pendant le scan</th></tr></thead>
+<tbody>
+<tr><td>0</td><td>40,95 s</td><td>−0,9 cm</td><td>0,0 cm</td><td>0,003 m/s</td><td>0</td></tr>
+<tr><td>0,01</td><td>40,95 s</td><td>−1,0 cm</td><td>0,0 cm</td><td>0,002 m/s</td><td>&lt; 2 mm</td></tr>
+<tr class="em"><td>0,1</td><td>40,60 s</td><td>−1,3 cm</td><td>−0,9 cm</td><td>0,009 m/s</td><td>&lt; 2,5 cm</td></tr>
+</tbody></table>
+<p>Un second essai à <code>g_noise</code> = 0,1 (autres graines de bruit) donne un posé à 41,25 s, avec −0,4 cm d'écart et 0,007 m/s de vitesse relative. Il n'y a aucun dépassement de la voiture pendant la poursuite, et l'alignement est atteint vers <i>t</i> ≈ 36 s. Les fichiers de résultats contiennent ce second jeu de graines : le posé y a lieu à 40,95 s, 40,95 s et 41,25 s, et les écarts en <i>x</i> relevés en fin de simulation sont de −0,06, −0,20 et −1,47 cm.</p>
+<figure><img src="figures/cascade_mission_voiture.png" alt="Mission d'atterrissage sur la voiture : x, écart, z et ψ"><figcaption>Mission d'atterrissage à <code>g_noise</code> = 0,1. En haut : position du drone, de la voiture et référence, puis écart en <i>x</i>. En bas : altitude et angle de lacet. Les traits verticaux marquent les changements de phase (5, 15, 36 et 41 s environ).</figcaption></figure>
+
+<h3>14.7 Limites et suite</h3>
+<ul>
+<li>ψ dépasse de 0,26 rad (15°) à la fin du scan : le LQI suit la rampe en retard puis la dépasse quand elle s'arrête. Il faudrait adoucir la fin de la rampe.</li>
+<li><i>z</i> descend à −0,12 m pendant les 0,3 premières secondes (retard des moteurs au démarrage), et d'environ 3 cm sous <i>h<sub>v</sub></i> au posé : on pourrait ralentir sur les derniers centimètres.</li>
+<li>La trajectoire de la voiture est supposée connue et rectiligne. Étape suivante : trajectoire quelconque, avec <i>y<sub>v</sub></i>(<i>t</i>) et une anticipation <i>vy</i><sub>ref</sub> sur la boucle <i>y</i>.</li>
+<li>Pour C2, l'agent PPO remplacera la boucle <i>x</i> en fournissant <i>θ</i><sub>ref</sub>, et sera comparé à ce PD sur la même mission. Il peut exploiter la saturation (accélérer au maximum puis freiner au bon moment), ce que le PD linéaire ne fait pas.</li>
+</ul>
+
+<h2>15. Étape C2 : agent PPO pour la position x</h2>
+<p>La cascade de la section 14 sert de référence : l'agent PPO remplace la boucle externe de <i>x</i> et fournit <i>θ</i><sub>ref</sub>, le LQ d'attitude restant la boucle interne. Le projet a été réorganisé : les scripts Python sont dans <code>python/</code> (identification, environnements, entraînement, évaluation, export), avec <code>python/chemins.py</code> pour centraliser les chemins (section 21). Nous avons par ailleurs corrigé le bloc de bruit de θ dans <code>UAV_model.slx</code> (covariance de 0,0001 comme les autres sorties) : θ se mesure donc directement et l'estimation par ∫<i>ω<sub>y</sub></i> de la section 13.1 n'est plus nécessaire.</p>
+
+<h3>15.1 Environnement de position</h3>
+<p>L'architecture est hiérarchique : l'agent donne <i>θ</i><sub>ref</sub> = 0,2·<i>a</i> avec <i>a</i> ∈ [−1 ; 1], et un LQ d'attitude suit cette consigne. Le modèle est <strong>entièrement identifié à l'étape C1, sans réseau de neurones</strong>, car le mouvement en <i>x</i> est linéaire : ARX(2,6) du tangage, LQ d'attitude, <i>a<sub>x</sub></i> = 9,907·θ + 0,0024·<i>v<sub>x</sub></i> et intégration par trapèzes (<code>x_env.py</code>).</p>
+<ul>
+<li><strong>Consigne</strong> : sauts de position et sauts de vitesse (cible qui roule), lissés par un 2<sup>e</sup> ordre critique de τ = 1 s. Un saut de 2 m demande alors au plus 1,8 m/s², sous la limite d'environ 2 m/s² imposée par θ<sub>max</sub>.</li>
+<li><strong>Observation</strong> (7 composantes) : <i>e<sub>x</sub></i>, <i>v<sub>x</sub></i>, θ, <i>ω<sub>y</sub></i>, l'action précédente, l'intégrale conditionnelle et <i>v</i><sub>ref</sub> − <i>v<sub>x</sub></i>.</li>
+<li><strong>Récompense</strong> : la même forme à cinq termes que pour <i>z</i> et ψ, avec des échelles en mètres (5 cm, 50 cm, 2 m).</li>
+</ul>
+<p>Validation de la boucle interne : en rejouant le vol Simulink de l'étape C1, l'écart sur θ est de 0,00012 rad (RMSE) et l'écart maximal sur <i>x</i> de 8 cm pour 4 m de course. À cette occasion, tant que θ était estimé par ∫<i>ω<sub>y</sub></i>, le bruit faisait dériver l'intégrale d'environ 0,003 rad, soit 0,6 m de dérive en 10 s ; cette dérive est modélisée dans l'environnement comme option de robustesse.</p>
+
+<h3>15.2 Le LQ d'attitude de C1 est trop lent</h3>
+<div class="note"><span class="label">Pas de séparation des échelles de temps</span><p>Le LQ d'attitude de l'étape C1 (<i>q</i><sub>ang</sub> = 100, <i>q<sub>w</sub></i> = 10, <i>R</i> = 2·10<sup>4</sup>, montée de 0,85 s) ne convient pas comme boucle interne : avec lui, la cascade PD de <i>x</i> (0,23 ; 0,28) est <strong>instable</strong>, avec des oscillations croissantes de période d'environ 4 s. Sa bande passante (environ 2 rad/s) est voisine de celle de la boucle <i>x</i> (environ 1,5 rad/s).</p></div>
+<p>Le LQ est recalculé sur le même modèle ARX avec <i>q</i><sub>ang</sub> = 100, <i>q<sub>w</sub></i> = 1 et <i>R</i> = 200 : montée en 0,30 s avec 2,8 % de dépassement, et la cascade devient stable.</p>
+<table>
+<caption>Choix de la boucle interne d'attitude (échelon de θ de 0,1 rad, puis cascade PD 0,23 / 0,28 sur un saut de 2 m).</caption>
+<thead><tr><th>Boucle interne</th><th>Échelon de θ : montée / dépassement</th><th>Cascade PD, saut de 2 m</th></tr></thead>
+<tbody>
+<tr><td>LQ de C1 (<i>R</i> = 2·10<sup>4</sup>)</td><td>0,85 s / 0,4 %</td><td>instable (oscille à ±0,5 m)</td></tr>
+<tr><td>LQ, <i>R</i> = 10<sup>3</sup></td><td>0,70 s / 0 %</td><td>4,5 % de dépassement, réponse en 9,2 s</td></tr>
+<tr class="em"><td>LQ, <i>q<sub>w</sub></i> = 1, <i>R</i> = 200 (<strong>retenu</strong>)</td><td>0,30 s / 2,8 %</td><td>0 % de dépassement, réponse en 4,8 s</td></tr>
+<tr><td>LQI de θ (0,443 ; 0,130 ; 0,280)</td><td>diverge</td><td>diverge</td></tr>
+</tbody></table>
+<p>Le LQI de θ ne fonctionne que dans son modèle Simulink à pas variable, où le contrôleur est en pratique continu. Échantillonné à 20 Hz, avec le retard moteur de 0,2 s, il devient instable : c'est le même phénomène que pour les gains de <i>z</i> de <code>LQI.m</code>.</p>
+
+<h3>15.3 Référence PD</h3>
+<p>Les scénarios d'évaluation sont fixes (<code>eval_x.py</code>) : un saut de 2 m, un saut de 5 m (4,6 m/s² demandés, donc θ sature), une cible à 0,3 m/s (la voiture), une cible à 1 m/s, et 20 missions aléatoires (graine 12345). Chacun est joué sans bruit et avec un bruit de mesure de 0,0045, équivalent à <code>g_noise</code> = 0,1.</p>
+<table>
+<caption>Cascades PD sur le modèle Python, sans bruit (rendement maximal 400).</caption>
+<thead><tr><th>Contrôleur</th><th>Saut de 2 m</th><th>Saut de 5 m</th><th>Écart final, voiture à 0,3 m/s</th><th>20 missions : rendement / RMSE</th></tr></thead>
+<tbody>
+<tr><td>PD de la cascade LQI, sans anticipation (0,23 / 0,28)</td><td>290</td><td>239</td><td>36,5 cm (traînage)</td><td>296 / 0,181 m</td></tr>
+<tr><td>PD + anticipation de vitesse (0,23 / 0,28)</td><td>345</td><td>301</td><td>0,0 cm</td><td>361 / 0,035 m</td></tr>
+<tr class="em"><td>PD + anticipation optimisé (<i>K</i><sub>p</sub> = 0,3 ; <i>K</i><sub>d</sub> = 0,45)</td><td>360</td><td>314</td><td>0,0 cm</td><td>372,7 / 0,024 m</td></tr>
+</tbody></table>
+<p>Le dernier réglage vient d'une grille de 63 couples de gains. Il sert de référence dans la suite.</p>
+<figure><img src="figures/x_reference_pd.png" alt="Référence PD en x"><figcaption>Réponses de la cascade PD de référence sur les scénarios d'évaluation.</figcaption></figure>
+
+<h3>15.4 Premier agent PPO</h3>
+<p>Entraînement PPO avec 16 environnements, <i>n</i><sub>steps</sub> = 512, des lots de 1024, un réseau 64×64, <code>log_std_init</code> = −1 et un bruit équivalent à <code>g_noise</code> = 0,1 : 2 millions de transitions en 6,7 minutes (environ 5 000 par seconde). Le meilleur agent est obtenu à 1,4 million de transitions ; le PD de référence est dépassé dès 600 000 (<code>train_ppo_x.py</code>).</p>
+<table>
+<caption>Premier agent contre PD optimisé (0,3 / 0,45). Rendement / dépassement / réponse à 5 cm.</caption>
+<thead><tr><th>Contrôleur, bruit</th><th>Saut de 2 m</th><th>Saut de 5 m (saturé)</th><th>Voiture, écart final</th><th>20 missions : rendement / RMSE / agitation</th></tr></thead>
+<tbody>
+<tr class="em"><td>Agent, sans bruit</td><td>375,6 / 0,1 % / 5,30 s</td><td>303,5 / 0,1 % / 6,25 s</td><td>0,6 cm</td><td>384,6 / 0,018 m / 0,0072</td></tr>
+<tr><td>Agent, g ≈ 0,1</td><td>373,4 / 0,4 % / 5,30 s</td><td>301,7 / 0,2 % / 6,25 s</td><td>0,3 cm</td><td>382,9 / 0,018 m / 0,0297</td></tr>
+<tr><td>PD, sans bruit</td><td>359,6 / 0,4 % / 5,30 s</td><td>314,3 / 0,2 % / 5,55 s</td><td>0,0 cm</td><td>372,7 / 0,024 m / 0,0128</td></tr>
+<tr><td>PD, g ≈ 0,1</td><td>356,8 / 0,6 % / 5,30 s</td><td>312,4 / 0,2 % / 5,60 s</td><td>0,5 cm</td><td>371,7 / 0,024 m / 0,0228</td></tr>
+</tbody></table>
+<p>L'agent bat le meilleur PD sur les consignes faisables : RMSE de 0,018 m contre 0,024 m (−25 %). Il fait <em>moins bien</em> sur le saut saturé de 5 m (303 contre 314), alors qu'on attendait l'inverse. La consigne d'entraînement est faisable par construction (sauts d'au plus 2 m avec τ = 1 s) : l'agent n'a presque jamais vu de saturation prolongée et n'a pas appris à accélérer au maximum puis à freiner. Il freine trop tard et dépasse la voiture de 0,60 m (voiture 5,5 m devant à 0,3 m/s, le cas de la mission LQ) et la cible de 1,97 m sur un saut de 8 m.</p>
+
+<h3>15.5 Réentraînement pour les saturations</h3>
+<p>L'agent est réentraîné depuis zéro (<code>train_ppo_x_saturation.py</code>) sur des consignes tirées dans trois familles :</p>
+<ul>
+<li><strong>40 % : PRBS de grande amplitude</strong>, à deux niveaux écartés de 2 à 8 m, avec une période de bit de 1,5 à 4 s ;</li>
+<li><strong>30 % : poursuite</strong>, avec une cible qui part 3 à 9 m devant à 0,2–1 m/s et, une fois sur deux, change ensuite de vitesse ou s'arrête ;</li>
+<li><strong>30 % : missions normales</strong>, celles du premier agent.</li>
+</ul>
+<p>La récompense est celle de <code>x_env</code> tant que |<i>e</i>| &lt; 2 m, puis prolongée de 2 à 10 m par une pente −0,2·(min(|<i>e</i>|, 10) − 2)/8. Sans ce prolongement, le terme de guidage lointain est plat au-delà de 2 m et l'agent ne sait plus s'il se rapproche. Le meilleur modèle maximise la <strong>somme</strong> des rendements moyens de 20 missions normales et de six scénarios de saturation fixes. L'entraînement dure 4 millions de transitions en 12,8 minutes, avec le même bruit ; le meilleur modèle est obtenu à 2,8 millions.</p>
+<table>
+<caption>Scénarios de saturation, sans bruit. Rendement / temps de rattrapage (|<i>e</i>| &lt; 10 cm) / dépassement / part du temps où <i>θ</i><sub>ref</sub> sature.</caption>
+<thead><tr><th>Scénario</th><th>Nouvel agent</th><th>PD 0,3 / 0,45</th><th>Premier agent</th></tr></thead>
+<tbody>
+<tr><td>Saut de 5 m</td><td>336,8 / 3,6 s / 0,04 m / 5 %</td><td>314,3 / 5,4 s / 0,11 m / 10 %</td><td>303,5 / 5,7 s / 0,45 m / 13 %</td></tr>
+<tr><td>Saut de 8 m</td><td>272,2 / 6,7 s / 0,26 m / 12 %</td><td>245,1 / 8,3 s / 0,61 m / 18 %</td><td>222,8 / 8,2 s / 1,97 m / 28 %</td></tr>
+<tr><td>Aller-retour de 6 m</td><td>242,7 / 11,0 s / – / 12 %</td><td>185,7 / 13,1 s / – / 27 %</td><td>144,3 / 13,7 s / – / 35 %</td></tr>
+<tr><td>Voiture à 5,5 m, 0,3 m/s</td><td>332,7 / 3,9 s / 0,02 m / 6 %</td><td>313,0 / 3,7 s / 0,10 m / 12 %</td><td>290,2 / 6,2 s / 0,60 m / 15 %</td></tr>
+<tr><td>Voiture à 8 m, 0,8 m/s</td><td>285,0 / 4,8 s / 0,04 m / 10 %</td><td>260,6 / 7,0 s / 0,29 m / 18 %</td><td>221,3 / 8,2 s / 1,79 m / 28 %</td></tr>
+<tr><td>Voiture à 4 m, 0,5 m/s, qui freine</td><td>331,9 / 3,6 s / 0,03 m / 4 %</td><td>314,0 / 4,0 s / 0,06 m / 8 %</td><td>330,9 / 3,8 s / 0,12 m / 8 %</td></tr>
+<tr class="em"><td>Moyenne des six scénarios</td><td>300,2</td><td>272,1</td><td>252,2</td></tr>
+</tbody></table>
+<p>Pour l'aller-retour, l'indicateur de dépassement n'est pas donné : il est calculé dans le sens du premier saut et mesure en réalité le retard sur le trajet retour. Un vrai dépassement, mesuré transition par transition, est donné dans la section 16.</p>
+<figure><img src="figures/x_sat_vols.png" alt="Agent x réentraîné contre PD et premier agent"><figcaption>Saut de 8 m, aller-retour de 6 m, voiture à 5,5 m (0,3 m/s) et voiture à 8 m (0,8 m/s) : position, erreur et <i>θ</i><sub>ref</sub> pour les trois contrôleurs. Le nouvel agent bascule de +0,2 à −0,2 plus tôt que le premier.</figcaption></figure>
+<figure class="m"><img src="figures/x_sat_courbe.png" alt="Courbe d'apprentissage de l'agent x réentraîné"><figcaption>Courbe d'apprentissage de l'agent réentraîné.</figcaption></figure>
+<table>
+<caption>Évaluation standard (<code>eval_x.py</code>) : rendement / RMSE / agitation sur 20 missions, saut de 2 m, saut de 5 m.</caption>
+<thead><tr><th>Contrôleur, bruit</th><th>20 missions</th><th>Saut de 2 m : rendement / dépassement</th><th>Saut de 5 m : rendement / réponse à 5 cm</th><th>Voiture 0,3 m/s : écart final</th></tr></thead>
+<tbody>
+<tr class="em"><td>Nouvel agent, sans bruit</td><td>375,4 / 0,0219 m / 0,0112</td><td>373,3 / 0,1 %</td><td>336,8 / 6,40 s</td><td>0,0 cm</td></tr>
+<tr><td>Nouvel agent, g ≈ 0,1</td><td>373,8 / 0,0221 m / 0,0275</td><td>371,5 / 0,3 %</td><td>334,9 / 6,45 s</td><td>0,3 cm</td></tr>
+<tr><td>PD, sans bruit</td><td>372,7 / 0,0240 m / 0,0128</td><td>359,6 / 0,4 %</td><td>314,3 / 5,55 s</td><td>0,0 cm</td></tr>
+<tr><td>PD, g ≈ 0,1</td><td>371,7 / 0,0245 m / 0,0228</td><td>356,8 / 0,6 %</td><td>312,4 / 5,60 s</td><td>0,5 cm</td></tr>
+<tr><td>Premier agent, sans bruit</td><td>384,6 / 0,0176 m / 0,0072</td><td>375,6 / 0,1 %</td><td>303,5 / 6,25 s</td><td>0,6 cm</td></tr>
+<tr><td>Premier agent, g ≈ 0,1</td><td>382,9 / 0,0179 m / 0,0297</td><td>373,4 / 0,4 %</td><td>301,7 / 6,25 s</td><td>0,3 cm</td></tr>
+</tbody></table>
+<div class="note ok"><span class="label">Un compromis assumé</span><p>En saturation, le nouvel agent est le meilleur des trois : sur la voiture à 5,5 m il dépasse de 0,02 m contre 0,60 m pour le premier agent, et sur la voiture à 8 m roulant à 0,8 m/s de 0,04 m contre 1,79 m. Il dépasse 2 à 7 fois moins que le PD et rattrape plus vite (4,8 s contre 7,0 s sur la voiture à 0,8 m/s). Il a appris la stratégie attendue : accélérer au maximum, puis freiner par anticipation. En contrepartie, il perd un peu en précision fine (RMSE de 0,022 m contre 0,018 m sur les 20 missions, mais toujours meilleur que le PD à 0,024 m) et il est plus lent sur les cinq derniers centimètres : sur le saut de 5 m, 10 cm en 3,6 s contre 5,4 s pour le PD, mais 5 cm en 6,4 s contre 5,55 s. Le critère de sélection, la somme des deux rendements, évite de sacrifier l'un des deux objectifs. C'est cet agent qui est retenu pour la mission d'atterrissage.</p></div>
+
+<h2>16. Essais PRBS des agents et des contrôleurs classiques</h2>
+<p>Les échelons ne disent pas si les agents suivent des consignes riches, ni quelle est leur bande passante en boucle fermée. On utilise donc des <strong>séquences binaires pseudo-aléatoires</strong> (PRBS) de longueur maximale, produites par un registre à décalage. La période de bit <i>T<sub>b</sub></i> est de l'ordre du temps de montée en boucle fermée de chaque axe, et la consigne passe par le même lissage qu'à l'entraînement. Les indicateurs sont la RMSE et l'écart maximal sur la consigne lissée, le retard (maximum de l'intercorrélation), la bande à −3 dB (estimateur <i>H</i><sub>1</sub> = <i>P<sub>ry</sub></i>/<i>P<sub>rr</sub></i> par la méthode de Welch, <code>nperseg</code> = 256, en ne gardant que les points de cohérence supérieure à 0,8) et l'agitation de la commande (moyenne de |Δ<i>a</i>|).</p>
+
+<h3>16.1 Essais courts</h3>
+<p>Premiers essais, d'environ une minute (<code>essais_prbs.py</code>) : <i>z</i> entre 0,3 et 0,7 m (<i>T<sub>b</sub></i> = 0,5 s, 63 bits, décollage compris), vitesse de lacet de ±0,6 rad/s (<i>T<sub>b</sub></i> = 0,5 s) et <i>x</i> entre 0 et 1,5 m (<i>T<sub>b</sub></i> = 1,5 s, 31 bits). Pour le lacet, on excite la variable sur laquelle l'agent a été entraîné.</p>
+<table>
+<caption>Essais PRBS courts. L'agent de <i>x</i> est le premier agent ; le LQI de <i>z</i> a ses gains divisés par 2.</caption>
+<thead><tr><th>Axe</th><th>Contrôleur</th><th>RMSE</th><th>Écart max</th><th>Retard</th><th>Bande à −3 dB</th><th>Agitation</th></tr></thead>
+<tbody>
+<tr><td rowspan="2"><i>z</i></td><td>Agent PPO</td><td>0,0268 m</td><td>0,054</td><td>0,10 s</td><td>2,42 Hz</td><td>0,027</td></tr>
+<tr><td>LQI</td><td>0,0797 m</td><td>0,180</td><td>0,40 s</td><td>1,25 Hz</td><td>0,016</td></tr>
+<tr><td rowspan="2">ψ</td><td>Agent PPO</td><td>0,0326 rad</td><td>0,070</td><td>0,00 s</td><td>2,11 Hz (sur <i>ω</i>)</td><td>0,047</td></tr>
+<tr><td>LQI de lacet</td><td>0,1368 rad</td><td>0,345</td><td>0,35 s</td><td>0,47 Hz</td><td>0,046</td></tr>
+<tr><td rowspan="2"><i>x</i></td><td>Agent PPO</td><td>0,0605 m</td><td>0,158</td><td>0,10 s</td><td>1,33 Hz</td><td>0,054</td></tr>
+<tr><td>PD 0,3 / 0,45</td><td>0,0729 m</td><td>0,174</td><td>0,10 s</td><td>1,17 Hz</td><td>0,051</td></tr>
+</tbody></table>
+<p>Avec un bruit équivalent à <code>g_noise</code> = 0,1, les RMSE sont quasiment identiques : les trois agents suivent bien des consignes riches sans dégradation due au bruit. Le diagramme de Bode du LQI de lacet montre en outre une forte résonance vers 1,5 Hz, signe d'une faible marge de stabilité.</p>
+<figure><img src="figures/prbs_bode.png" alt="Diagrammes de Bode des essais PRBS courts"><figcaption>Gain et phase des trois axes, agent contre contrôleur classique (essais courts). La consigne étant lissée, son spectre est faible au-delà de 0,5 Hz environ pour <i>x</i> : seule la zone de cohérence élevée est fiable.</figcaption></figure>
+
+<h3>16.2 Essais longs</h3>
+<p>Les essais longs (<code>essais_prbs_longs.py</code>, 2 à 4 minutes de vol) reprennent la même idée avec des séquences de 7 bits, ou de 6 bits avec une période de bit plus longue. Ils apportent une réponse en fréquence plus fiable (plus de segments moyennés), une vérification de stabilité sur un vol long (RMSE du premier et du dernier quart) et un vrai essai de saturation. Quatre essais : <i>z</i> (0,3 ↔ 0,7 m, <i>T<sub>b</sub></i> = 0,5 s, 130 s), lacet (±0,6 rad/s, 129 s), <i>x</i> fin (0 ↔ 1,5 m, <i>T<sub>b</sub></i> = 1,5 s, 192 s, consignes faisables) et <i>x</i> grand (0 ↔ 6 m, <i>T<sub>b</sub></i> = 4 s, 254 s, <i>θ</i><sub>ref</sub> sature à chaque transition). Pour <i>x</i>, quatre contrôleurs sont comparés, tous avec le LQ d'attitude rapide : l'agent réentraîné (retenu), le premier agent, le LQ + PD optimisé (0,3 / 0,45 avec anticipation) et le LQ + PD de la cascade LQI (0,23 / 0,28, sans anticipation).</p>
+<table>
+<caption>Essais PRBS longs, sans bruit (avec bruit, la RMSE est identique à ±0,001 près).</caption>
+<thead><tr><th>Essai</th><th>Contrôleur</th><th>RMSE</th><th>1<sup>er</sup> / dernier quart</th><th>Écart max</th><th>Retard</th><th>Bande à −3 dB</th><th>Agitation (sans / avec bruit)</th></tr></thead>
+<tbody>
+<tr><td rowspan="2"><i>z</i></td><td>Agent PPO</td><td>0,0267 m</td><td>0,0245 / 0,0286</td><td>0,054</td><td>0,10 s</td><td>2,34 Hz</td><td>0,026 / 0,036</td></tr>
+<tr><td>LQI</td><td>0,0795 m</td><td>0,0798 / 0,0788</td><td>0,172</td><td>0,40 s</td><td>1,25 Hz</td><td>0,015 / 0,017</td></tr>
+<tr><td rowspan="2">Lacet</td><td>Agent PPO</td><td>0,0326 rad</td><td>0,0318 / 0,0332</td><td>0,070</td><td>0,00 s</td><td>2,11 Hz (sur <i>ω</i>)</td><td>0,048 / 0,062</td></tr>
+<tr><td>LQI</td><td>0,1354 rad</td><td>0,1511 / 0,1182</td><td>0,360</td><td>0,30 s</td><td>0,55 Hz</td><td>0,047 / 0,111</td></tr>
+<tr><td rowspan="4"><i>x</i> fin</td><td>Agent réentraîné</td><td>0,0600 m</td><td>0,0526 / 0,0646</td><td>0,168</td><td>0,15 s</td><td>1,48 Hz</td><td>0,052 / 0,057</td></tr>
+<tr><td>Premier agent</td><td>0,0606 m</td><td>0,0496 / 0,0681</td><td>0,160</td><td>0,10 s</td><td>1,41 Hz</td><td>0,053 / 0,061</td></tr>
+<tr><td>LQ + PD optimisé</td><td>0,0725 m</td><td>0,0618 / 0,0798</td><td>0,175</td><td>0,15 s</td><td>1,17 Hz</td><td>0,050 / 0,052</td></tr>
+<tr><td>LQ + PD (cascade LQI)</td><td>0,2675 m</td><td>0,2599 / 0,2669</td><td>0,535</td><td>1,05 s</td><td>0,31 Hz</td><td>0,010 / 0,014</td></tr>
+<tr><td rowspan="4"><i>x</i> grand</td><td>Agent réentraîné</td><td>0,5625 m</td><td>0,381 / 0,663</td><td>1,555</td><td>0,45 s</td><td>non linéaire</td><td>0,029 / 0,038</td></tr>
+<tr><td>Premier agent</td><td>0,5796 m</td><td>0,400 / 0,667</td><td>1,609</td><td>0,25 s</td><td>non linéaire</td><td>0,038 / 0,047</td></tr>
+<tr><td>LQ + PD optimisé</td><td>0,6045 m</td><td>0,402 / 0,721</td><td>1,759</td><td>0,45 s</td><td>non linéaire</td><td>0,042 / 0,045</td></tr>
+<tr><td>LQ + PD (cascade LQI)</td><td>1,0753 m</td><td>0,791 / 1,236</td><td>2,140</td><td>1,10 s</td><td>0,31 Hz</td><td>0,015 / 0,020</td></tr>
+</tbody></table>
+<table>
+<caption>Dépassement mesuré transition par transition (au-delà du niveau visé), sans bruit.</caption>
+<thead><tr><th>Contrôleur</th><th><i>x</i> grand (32 transitions) : moyen / max / nombre &gt; 5 cm</th><th><i>x</i> fin (64 transitions) : max</th></tr></thead>
+<tbody>
+<tr class="em"><td>Agent réentraîné</td><td>0,002 m / 0,016 m / 0 sur 32</td><td>0,007 m</td></tr>
+<tr><td>Premier agent</td><td>0,162 m / 0,386 m / 22 sur 32</td><td>0,001 m</td></tr>
+<tr><td>LQ + PD optimisé</td><td>0,007 m / 0,015 m / 0 sur 32</td><td>0,007 m</td></tr>
+<tr><td>LQ + PD (cascade LQI)</td><td>0 / 0 / 0 sur 32 (retard de 1,1 s, RMSE de 1,08 m)</td><td>0</td></tr>
+</tbody></table>
+<figure><img src="figures/prbs_long_z.png" alt="PRBS long sur z : agent contre LQI"><figcaption>PRBS longue sur <i>z</i>, agent contre LQI : vol complet à gauche, zoom sur les 40 premières secondes à droite ; consigne et sortie, erreur, commande.</figcaption></figure>
+<figure><img src="figures/prbs_long_psi.png" alt="PRBS long sur le lacet : agent contre LQI"><figcaption>PRBS longue sur la vitesse de lacet, agent contre LQI : consigne, ψ et <i>ω<sub>z</sub></i>, erreur et commande.</figcaption></figure>
+<figure><img src="figures/prbs_long_x_grand.png" alt="PRBS long de 0 à 6 m sur x : quatre contrôleurs"><figcaption>PRBS de grande amplitude sur <i>x</i> (0 ↔ 6 m), quatre contrôleurs : <i>θ</i><sub>ref</sub> sature à chaque transition.</figcaption></figure>
+<figure><img src="figures/prbs_long_bode.png" alt="Diagrammes de Bode des quatre essais longs"><figcaption>Gain et phase de <i>z</i>, du lacet et de <i>x</i> (essais longs).</figcaption></figure>
+<div class="note ok"><span class="label">Ce que montrent les essais longs</span><p><strong>Pas de dérive</strong> : les écarts entre le premier et le dernier quart se retrouvent chez les contrôleurs classiques (LQI de lacet : 0,151 puis 0,118) ; ils viennent donc du contenu de la PRBS sur chaque quart, pas d'une dégradation des agents. Le bruit ne change pas la RMSE ; il n'augmente que l'agitation. <strong><i>z</i> et lacet</strong> : les résultats courts sont confirmés. En <i>z</i>, la RMSE est 3 fois plus faible que celle du LQI, le retard 4 fois plus court et la bande 1,9 fois plus large ; en lacet, la RMSE est 4,2 fois plus faible et la bande 3,8 fois plus large. Le prix est une commande plus agitée (en <i>z</i> : 0,026 contre 0,015). <strong><i>x</i> faisable</strong> : les deux agents battent la meilleure cascade LQ + PD (−17 % de RMSE, bande de 1,48 contre 1,17 Hz), et le réentraînement ne coûte pas de précision ici. <strong><i>x</i> en saturation</strong> : l'agent réentraîné a la RMSE la plus faible et ne dépasse jamais la cible de plus de 2 cm, alors que le premier agent dépasse de plus de 5 cm sur 22 transitions sur 32 (jusqu'à 39 cm). Le PD optimisé dépasse peu aussi, mais il est plus lent aux basculements (écart maximal de 1,76 m contre 1,56 m). Le PD de la cascade LQI, sans anticipation, ne dépasse jamais mais est 4 fois moins précis (retard d'environ 1 s) : c'est l'intérêt de l'anticipation de vitesse. La bande passante n'a pas de sens pour <i>x</i> grand, le système étant non linéaire en saturation ; la RMSE de 0,56 m est inévitable, puisque la consigne lissée de 6 m en τ = 1 s n'est pas atteignable.</p></div>
+
+<h2>17. Étape C2.4 : vol de l'agent x sur Simulink</h2>
+<p>La chaîne d'export est la même que pour le lacet, dans le dossier <code>simulink_RL/x/</code> (<code>simulink_RL/zpsi/</code> reste inchangé). <code>export_x.py</code> écrit les trois politiques (<code>policy_x.mat</code> pour l'agent réentraîné, <code>policy_z.mat</code> et <code>policy_psi.mat</code>), le gain du LQ d'attitude rapide et un vol Python sans bruit de 800 pas. Le gain est <i>K</i> = [0,50262 ; 0,14812 ; 0,00886 ; 0,00354 ; 0,17685 ; 0,00301 ; 0,00267 ; 0,00274 ; 0,00228].</p>
+<p>Le contrôleur <code>rl_controller_x.m</code> (appelé à chaque pas, <i>T<sub>s</sub></i> = 0,05 s) applique <i>θ</i><sub>ref</sub> = 0,2·<i>a<sub>x</sub></i>, puis le LQ d'attitude <i>u<sub>θ</sub></i> = −<i>K</i>·[θ − <i>θ</i><sub>ref</sub>, <i>ω<sub>y</sub></i>, <i>ω̇<sub>y</sub></i>(<i>k</i>), <i>ω̇<sub>y</sub></i>(<i>k</i>−1), <i>u<sub>θ</sub></i>(<i>k</i>−1 à <i>k</i>−5)] ; le même LQ tient φ à 0. Une anticipation de l'inclinaison est ajoutée sur <i>z</i> : <i>u<sub>z</sub></i> + 0,39·(1/(cos θ·cos φ) − 1). Le mélangeur « + » de l'étape A est suivi d'une saturation à ±1, et les commandes de tangage et de roulis réellement appliquées sont mémorisées pour le LQ. <code>construire_boucle_x.m</code> crée <code>EINT_RL_closed_loop_x.slx</code>, et <code>EINT_RL_eval_x.m</code> lance la vérification puis les vols.</p>
+<p><strong>Vérification.</strong> Sur les 800 pas du vol Python rejoués dans <code>controleur_x.m</code>, la consigne, les sept composantes d'observation, l'action de l'agent <i>x</i> et la commande <i>u<sub>θ</sub></i> sont identiques à Python (tolérances de 10<sup>−9</sup> sur la consigne, 10<sup>−5</sup> sur l'observation, 10<sup>−4</sup> sur l'action et 10<sup>−6</sup> sur <i>u<sub>θ</sub></i>).</p>
+<p><strong>Mission de 40 s.</strong> Décollage à 0,5 m à <i>t</i> = 1 s, cap tenu à ψ = 0 ; saut de +2 m en <i>x</i> à 4 s, retour à 0 à 12 s ; à 20 s, la « voiture » apparaît 5,5 m devant et roule à 0,3 m/s, le cas de la mission LQ de la section 14.</p>
+<table>
+<caption>Vols sur Simulink de l'agent <i>x</i> avec les agents <i>z</i> et lacet.</caption>
+<thead><tr><th><code>g_noise</code></th><th>RMSE <i>x</i> (consigne lissée)</th><th>Écart max à la prédiction Python</th><th>Écart max à la voiture après rattrapage (<i>t</i> ≥ 30 s)</th><th>Dépassement de la voiture</th><th>RMSE <i>z</i> (<i>t</i> &gt; 3 s)</th><th>|ψ| max</th><th>|<i>y</i>| max</th></tr></thead>
+<tbody>
+<tr><td>0</td><td>0,209 m</td><td>0,134 m</td><td>0,011 m</td><td>0,003 m</td><td>0,001 m</td><td>0,003 rad</td><td>0,015 m</td></tr>
+<tr class="em"><td>0,1</td><td>0,208 m</td><td>0,137 m</td><td>0,024 m</td><td>0,014 m</td><td>0,005 m</td><td>0,017 rad</td><td>1,08 m</td></tr>
+</tbody></table>
+<figure><img src="figures/vol_x_simulink.png" alt="Vol de l'agent x sur Simulink"><figcaption>Vol de l'agent <i>x</i> sur Simulink : position (consigne, prédiction Python, Simulink sans bruit et avec <code>g_noise</code> = 0,1), erreur, θ contre <i>θ</i><sub>ref</sub>, altitude, puis <i>y</i> et ψ.</figcaption></figure>
+<p>Simulink reproduit la prédiction Python : à <i>t</i> = 6, 10, 18, 35 et 40 s, l'écart est d'au plus 2 mm. L'écart maximal (environ 13 cm) apparaît vers 22 s, en plein rattrapage saturé (<i>θ</i><sub>ref</sub> = ±0,2) : il vient des petites différences entre l'ARX et le simulateur aux grandes inclinaisons, puis se résorbe. La RMSE de 0,21 m en <i>x</i> est dominée par ce rattrapage, la consigne lissée de 5,5 m en τ = 1 s n'étant pas atteignable. Le rattrapage de la voiture marche comme en Python : pas de dépassement notable (3 mm sans bruit, 1,4 cm avec), puis un suivi à 1 à 2 cm de la voiture qui roule. L'altitude reste à 0,5 m pendant les manœuvres (RMSE de 1 à 5 mm) : l'agent <i>z</i>, aidé par l'anticipation en 1/cos, compense la perte de poussée verticale à θ = 0,2 rad (environ 2 %), et ψ reste sous 1,1°.</p>
+<div class="note"><span class="label">La position y</span><p>Dans ce vol, φ est tenu à 0 par le LQ et <i>y</i> dérive librement avec le bruit (environ 1 à 1,7 m en 40 s). L'étape C3 (section 18) la résout : le même agent, par symétrie, asservit <i>y</i>, avec les erreurs projetées dans le repère du drone par ψ.</p></div>
+
+
+<h2>18. Étape C3 : position (x, y) et rotation par ψ</h2>
+<p>Aucun nouvel entraînement ni aucune nouvelle identification n'a été nécessaire. L'identification de l'étape C1 (section 13) montre que les deux axes du drone sont identiques : l'ARX de φ a le même gain que celui de θ (171,76 contre 171,78 rad/s² par unité, couplage inférieur à 2 %), et les accélérations valent <i>a<sub>x</sub></i> = +9,91·θ et <i>a<sub>y</sub></i> = −9,91·φ. En posant θ' = −φ, l'axe latéral devient un axe <i>x</i> identique à l'axe avant. L'agent <i>x</i> retenu (<code>agent_x_ppo_saturation</code>) et le même LQ d'attitude rapide pilotent donc <strong>les deux axes</strong> du drone :</p>
+<ul>
+<li><strong>axe avant</strong> : observation [<i>e<sub>av</sub></i>/2, <i>v<sub>av</sub></i>, θ/0,2, ω<sub>y</sub>, <i>a<sub>av</sub></i> précédent, ∫<i>e<sub>av</sub></i>/0,5, <i>v</i><sub>ref</sub> − <i>v<sub>av</sub></i>], puis <i>θ</i><sub>ref</sub> = 0,2·<i>a<sub>av</sub></i> ;</li>
+<li><strong>axe latéral</strong> : même observation avec −φ et −ω<sub>x</sub>, puis <i>φ</i><sub>ref</sub> = −0,2·<i>a<sub>co</sub></i>.</li>
+</ul>
+
+<h3>18.1 La rotation par ψ est un changement de repère</h3>
+<p>Les consignes et les mesures de <i>x</i>, <i>y</i>, <i>v<sub>x</sub></i>, <i>v<sub>y</sub></i> sont exprimées dans le repère du sol, alors que θ et φ inclinent le drone selon ses propres axes. On projette donc l'erreur, la vitesse et la vitesse de consigne dans le repère du drone :</p>
+<div class="eq">e_av = cos ψ · e_x + sin ψ · e_y
+e_co = −sin ψ · e_x + cos ψ · e_y</div>
+<p>C'est la convention du bloc <code>rotation_psi</code> de la mission LQ. Les intégrales sont tenues dans le repère du drone. Le cap reste à 0 pendant les déplacements : le drone va en diagonale, sans s'orienter vers la cible, et le signe est absorbé par le facteur −0,2.</p>
+
+<h3>18.2 Mission de 45 s sur Simulink</h3>
+<p>Décollage à 0,5 m à <i>t</i> = 1 s, scan de 360° entre 5 et 13 s en tenant la position (0, 0), déplacement en diagonale vers (2 ; 1,5) à 16 s, puis une « voiture » apparaît à 24 s en (5,5 ; 0), soit 3,5 m devant et 1,5 m sur le côté, et roule selon <i>x</i> à 0,3 m/s. La vérification pas à pas est <strong>OK</strong> : le contrôleur MATLAB et le LQ redonnent les valeurs de Python sur 900 pas (observations, actions et commandes <i>u<sub>θ</sub></i>, <i>u<sub>φ</sub></i> des deux axes).</p>
+<table>
+<caption>Vols Simulink de la mission en (<i>x</i>, <i>y</i>) : agent contre cascade PD 0,3/0,45 avec anticipation.</caption>
+<thead><tr><th>Vol</th><th>RMSE position</th><th>Dérive pendant le scan</th><th>Dépassement diagonale</th><th>Dépassement de la voiture</th><th>Écart voiture (<i>t</i> ≥ 35 s)</th><th>RMSE <i>z</i></th><th>Erreur ψ max</th></tr></thead>
+<tbody>
+<tr class="em"><td>Agent, <i>g</i> = 0</td><td>0,087 m</td><td>1,0 cm</td><td>0,1 cm</td><td>0,6 cm</td><td>0,3 cm</td><td>1 mm</td><td>0,046 rad</td></tr>
+<tr class="em"><td>Agent, <i>g</i> = 0,1</td><td>0,087 m</td><td>1,7 cm</td><td>1,3 cm</td><td>1,3 cm</td><td>1,6 cm</td><td>5 mm</td><td>0,053 rad</td></tr>
+<tr><td>PD, <i>g</i> = 0</td><td>0,087 m</td><td>0,0 cm</td><td>0,8 cm</td><td>7,0 cm</td><td>0,3 cm</td><td>1 mm</td><td>0,046 rad</td></tr>
+<tr><td>PD, <i>g</i> = 0,1</td><td>0,087 m</td><td>1,5 cm</td><td>1,5 cm</td><td>7,0 cm</td><td>2,0 cm</td><td>5 mm</td><td>0,053 rad</td></tr>
+</tbody></table>
+<p>L'écart entre Simulink et le vol Python prédit est de 1,5 cm à <i>g</i> = 0 et de 2,0 cm à <i>g</i> = 0,1. La RMSE est dominée par le retard inévitable sur les sauts de consigne, identique pour tous les contrôleurs. Le critère qui sépare les contrôleurs est le dépassement de la voiture : l'agent ne passe pas devant elle (au plus 1,3 cm), alors que le PD la dépasse de 7 cm.</p>
+<figure class="t"><img src="figures/vol_xy_simulink.png" alt="Vol Simulink en x et y"><figcaption>Vol Simulink de la mission en (<i>x</i>, <i>y</i>) : vue de dessus, <i>x</i>(<i>t</i>), <i>y</i>(<i>t</i>), erreur en échelle logarithmique, ψ et angles.</figcaption></figure>
+
+<h3>18.3 Rôle de la rotation (simulation Python)</h3>
+<p>On tient le cap à 90° avec <i>g</i> = 0,1. <strong>Avec la rotation</strong>, la RMSE est de 0,090 m et le dépassement de la voiture de 1,3 cm, comme à ψ = 0. <strong>Sans la rotation</strong>, la boucle diverge (900 m d'erreur à 45 s) : à ψ = 90°, une inclinaison θ fait avancer le drone selon <i>y</i> au lieu de <i>x</i>, et la boucle <i>x</i> pousse sur le mauvais axe.</p>
+<figure class="t"><img src="figures/sim_xy.png" alt="Simulation en x et y"><figcaption>Simulation Python de la mission (<i>x</i>, <i>y</i>). Le panneau en bas à droite montre le rôle de la rotation : avec un cap de 90°, la boucle diverge sans elle.</figcaption></figure>
+
+<h3>18.4 PRBS longs sur y, puis sur x et y avec cap tournant</h3>
+<p>Essais de 190 s à <i>g</i> = 0,1 sur le modèle ARX. L'essai A pilote <i>y</i> seul (PRBS de 7 bits entre 0 et 1,5 m, <i>T<sub>b</sub></i> = 1,5 s) ; l'essai B pilote <i>x</i> et <i>y</i> ensemble pendant que le drone tourne en continu à 0,2 rad/s (6 tours en 190 s), de sorte que les consignes passent sans cesse d'un axe du drone à l'autre.</p>
+<table>
+<caption>PRBS de 190 s sur <i>y</i> et sur (<i>x</i>, <i>y</i>) avec cap tournant, <i>g</i> = 0,1.</caption>
+<thead><tr><th>Essai</th><th>Contrôleur</th><th>RMSE</th><th>Bande passante −3 dB</th><th>Dépassements &gt; 5 cm</th></tr></thead>
+<tbody>
+<tr class="em"><td rowspan="2">A. <i>y</i> seul, ψ = 0</td><td>Agent</td><td>0,060 m</td><td>1,48 Hz</td><td>0/64</td></tr>
+<tr><td>PD 0,3/0,45</td><td>0,072 m</td><td>1,17 Hz</td><td>0/64</td></tr>
+<tr class="em"><td rowspan="2">B. <i>x</i> et <i>y</i>, cap tournant</td><td>Agent (<i>y</i> / <i>x</i>)</td><td>0,061 / 0,060 m</td><td>1,56 / 1,25 Hz</td><td>0/64, 0/46</td></tr>
+<tr><td>PD (<i>y</i> / <i>x</i>)</td><td>0,074 / 0,075 m</td><td>1,17 / 1,17 Hz</td><td>1/64, 0/46</td></tr>
+</tbody></table>
+<p>L'essai A reproduit exactement l'essai « <i>x</i> fin » de la section 16 (agent à 0,060 m et 1,48 Hz) : l'axe <i>y</i> miroir se comporte comme l'axe <i>x</i>. Dans l'essai B, les performances ne changent pas malgré la rotation, et l'erreur ne dérive pas sur 190 s.</p>
+<figure class="t"><img src="figures/prbs_xy.png" alt="PRBS en y et en x, y"><figcaption>PRBS longs : <i>y</i>(<i>t</i>), <i>x</i>(<i>t</i>), cap, diagramme de Bode et erreur sur tout le vol.</figcaption></figure>
+
+<div class="note"><span class="label">Le modèle LQI de y</span><p>Le modèle <code>test_LQI_y.slx</code> (ancien <code>indentification_phi.slx</code>) a une cascade <i>y</i> → φ correcte : le signe (+φ fait aller vers −<i>y</i>) et le mélangeur (+<i>u</i><sub>2</sub> / −<i>u</i><sub>4</sub>) sont justes. En revanche, sa boucle interne φ reprend les gains du LQI double intégrateur de <code>gains_LQI.m</code> (<i>K<sub>p</sub></i> 0,443, <i>K<sub>d</sub></i> 0,130, <i>K<sub>i</sub></i> 0,280) : elle ne fonctionne qu'en solveur continu, et échantillonnée à 20 Hz sur l'ARX identifié (retard moteur) elle diverge avec ces gains d'origine, avec une oscillation saturée jusqu'à 3,8 rad pour un échelon de 0,1 rad. Avec les gains réajustés pour 20 Hz (section 20.1), le LQI de θ est stable. Le contrôleur RL utilise le LQ synthétisé sur l'ARX (étape C1), plus rapide et mieux amorti.</p></div>
+
+<h2>19. Mission finale : scan, poursuite d'une voiture en virage et atterrissage</h2>
+<p>La mission réunit tout ce qui précède : le drone se stabilise à <i>z</i> = 0, monte à 0,5 m, fait un tour complet sur lui-même en 10 s (le scan), rattrape une voiture qui a démarré pendant le scan, la suit à altitude constante, puis descend lentement et se pose dessus. <strong>Aucun réentraînement</strong> n'a été fait : on réutilise l'agent <i>z</i> (<code>agent_z_ppo</code>), l'agent de lacet (<code>agent_psi_ppo</code>), l'agent <i>x</i> sur les deux axes avec rotation par ψ, et le LQ d'attitude. Trois éléments sont ajoutés : un superviseur, un générateur de trajectoire de voiture et une consigne d'approche.</p>
+
+<h3>19.1 La voiture</h3>
+<p>Modèle cinématique unicycle : <i>x</i>' = <i>v</i> cos(cap), <i>y</i>' = <i>v</i> sin(cap), cap' = <i>v</i>·κ. La vitesse <i>v</i>(<i>s</i>) et la courbure κ(<i>s</i>) sont des paliers raccordés par des transitions en S, de sorte que l'accélération et la variation de braquage sont bornées. Le scénario nominal : garée en (1,5 ; 0,5), la voiture démarre à 4 s, accélère à 0,5 m/s, ralentit à 0,35 m/s pour un virage à gauche de rayon 3 m, réaccélère à 0,6 m/s, prend une courbe à droite de rayon 6 m, puis freine à 0,3 m/s (accélération longitudinale ≤ 0,25 m/s², latérale ≤ 0,06 m/s²). La trajectoire est intégrée une fois au pas de 0,05 s et enregistrée en table (<code>voiture.mat</code>) : Python et Simulink voient exactement la même voiture. Une fois le scan fini, le drone est supposé connaître la position et la vitesse de la voiture (détection pendant le scan, puis suivi).</p>
+
+<h3>19.2 Le superviseur : une machine à états décidée sur les mesures</h3>
+<table>
+<caption>Les six phases du superviseur.</caption>
+<thead><tr><th>Phase</th><th>Consignes</th><th>Passage à la suivante</th></tr></thead>
+<tbody>
+<tr><td>0 Stabilisation</td><td><i>z</i><sub>ref</sub> = 0, ψ<sub>ref</sub> = 0, position (0, 0)</td><td>2 s</td></tr>
+<tr><td>1 Montée</td><td>saut lissé de <i>z</i><sub>ref</sub> vers 0,5 m (τ = 0,35 s, comme à l'entraînement)</td><td>|<i>z</i> − 0,5| &lt; 2 cm et |<i>v<sub>z</sub></i>| &lt; 5 cm/s pendant 1 s</td></tr>
+<tr><td>2 Scan</td><td>ψ<sub>ref</sub> : un tour à 2π/10 = 0,63 rad/s, départ et arrêt lissés</td><td>10 s écoulées, |ψ − 2π| &lt; 0,05 rad et |ω<sub>z</sub>| &lt; 0,1 rad/s</td></tr>
+<tr><td>3 Poursuite</td><td><i>p</i><sub>ref</sub> = <i>p<sub>v</sub></i> + Δ<sub>0</sub>(1 + <i>s</i>/τ)e<sup>−<i>s</i>/τ</sup>, τ = 1 s ; cap : voir 19.5</td><td>écart &lt; 5 cm et écart de vitesse &lt; 10 cm/s pendant 2 s d'affilée (et cap aligné à 3°)</td></tr>
+<tr><td>4 Descente</td><td><i>z</i><sub>ref</sub> descend à 0,1 m/s ; <strong>pause</strong> si l'écart horizontal dépasse 10 cm, la poursuite continuant</td><td><i>z</i> − <i>h<sub>v</sub></i> &lt; 2 cm</td></tr>
+<tr><td>5 Posé</td><td><i>z</i><sub>ref</sub> = <i>h<sub>v</sub></i> (= 0), suivi de la voiture maintenu</td><td>—</td></tr>
+</tbody></table>
+<p>Trois choix de conception. D'abord, la consigne d'approche démarre sur le drone (pas de saut) et rejoint la voiture comme un 2<sup>e</sup> ordre critique de τ = 1 s : c'est exactement le lissage des sauts vus par l'agent <i>x</i> à l'entraînement, et comme la vitesse de consigne contient celle de la voiture, les virages et les freinages sont anticipés. Ensuite, le superviseur est déterministe à partir des mesures, ce qui permet la vérification MATLAB = Python pas à pas. Enfin, <code>UAV_model</code> n'a pas de sol : « posé » signifie arrivé à la hauteur de la plateforme, aligné, à vitesse relative quasi nulle ; pour la même raison, le drone part moteurs coupés et descend d'environ 13 cm pendant la première seconde, avant que l'agent <i>z</i> ne le ramène à 0.</p>
+
+<h3>19.3 Première version (cap fixe) et lecture trop favorable au PD</h3>
+<p>La vérification est OK (1200 pas, écart &lt; 10<sup>−6</sup>) et l'écart de position entre Simulink et Python est de 7 mm au maximum sur toute la mission. Les vols Simulink de la première version, cap tenu à 0, donnent :</p>
+<table>
+<caption>Mission finale, première version (cap fixe), Simulink.</caption>
+<thead><tr><th>Vol</th><th>Début poursuite</th><th>Début descente</th><th>Posé</th><th>Écart au contact</th><th>Vitesse relative</th><th>Écart max en descente</th></tr></thead>
+<tbody>
+<tr><td>Agents, <i>g</i> = 0</td><td>15,75 s</td><td>25,30 s</td><td>30,20 s</td><td>0,8 cm</td><td>0,4 cm/s</td><td>3,8 cm</td></tr>
+<tr><td>Agents, <i>g</i> = 0,1</td><td>15,75 s</td><td>26,25 s</td><td>31,15 s</td><td>0,5 cm</td><td>1,3 cm/s</td><td>4,5 cm</td></tr>
+<tr><td>PD <i>x</i>/<i>y</i>, <i>g</i> = 0</td><td>15,75 s</td><td>24,20 s</td><td>29,10 s</td><td>0,7 cm</td><td>1,2 cm/s</td><td>2,6 cm</td></tr>
+<tr><td>PD <i>x</i>/<i>y</i>, <i>g</i> = 0,1</td><td>15,75 s</td><td>24,70 s</td><td>29,55 s</td><td>1,0 cm</td><td>1,3 cm/s</td><td>3,2 cm</td></tr>
+</tbody></table>
+<p>Dans les vols « PD », <i>z</i> et le lacet restent pilotés par les agents ; seule la position <i>x</i>/<i>y</i> passe à la cascade LQ + PD 0,3/0,45 avec anticipation. Le rattrapage fait passer l'écart de 6,8 m à moins de 10 cm en environ 5 s (θ sature à ±0,2 rad), sans dépasser la voiture. Sur 12 voitures aléatoires (départ, cap, vitesses de 0,25 à 0,7 m/s, deux virages de rayon ≥ 2,5 m, <i>g</i> = 0,1), les deux contrôleurs se posent 12 fois sur 12, avec au plus 4,5 cm d'écart au contact pour les agents et 3,3 cm pour le PD. Le PD semblait donc meilleur, ou équivalent. Cette lecture a été corrigée ensuite.</p>
+<figure class="t"><img src="figures/mission_finale_bilan13.png" alt="Mission finale, première version"><figcaption>Première version de la mission (cap fixe), vol Simulink : vue de dessus avec la voiture, altitude et phases, écart horizontal, cap et inclinaisons. La version finale est présentée en 19.6.</figcaption></figure>
+
+<h3>19.4 Pourquoi le PD semblait meilleur : un critère d'alignement biaisé</h3>
+<p>La consigne d'approche (Δ<sub>0</sub> = 6,8 m, τ = 1 s) n'arrive elle-même à 5 cm de la voiture qu'environ 7 s après le début de la poursuite (27 cm à 5 s, 12 cm à 6 s, 5 cm à 7 s). Le PD <strong>dépasse sa propre consigne de 12 cm</strong> en sortie de saturation (20–22 s) ; comme la consigne est encore derrière la voiture, ce dépassement le rapproche d'elle et lui fait passer le critère d'alignement plus tôt : le critère récompensait un défaut. L'agent suit sa consigne à 1–3 cm près, sans la dépasser. Un test isolé sur l'axe <i>x</i> (rattrapage saturé de 6,8 m d'une cible à 0,35 m/s) le confirme :</p>
+<table>
+<caption>Rattrapage isolé de 6,8 m d'une cible à 0,35 m/s, axe <i>x</i>.</caption>
+<thead><tr><th></th><th>Dépassement</th><th>Aligné (5 cm pendant 2 s)</th><th>θ saturé</th></tr></thead>
+<tbody>
+<tr class="em"><td>Agent</td><td>4,5 cm</td><td>3,4 s</td><td>1,4 s</td></tr>
+<tr><td>PD</td><td>21 cm</td><td>6,8 s</td><td>2,6 s</td></tr>
+</tbody></table>
+<p>Sur une cible qui accélère durablement (0,0625 m/s²), l'agent et le PD ont le même retard, 1,8 et 1,9 cm (la théorie pour le PD donne <i>a</i>/(9,91·<i>K<sub>p</sub></i>) = 2,1 cm) : l'accélération de la voiture n'est dans l'observation d'aucun des deux.</p>
+
+<h3>19.5 Trois améliorations de la version finale</h3>
+<p><strong>Choix de τ.</strong> On a comparé trois valeurs de τ pour la consigne d'approche, à <i>g</i> = 0,1, sur la voiture nominale et 12 voitures aléatoires (biais brut, cap fixe).</p>
+<table>
+<caption>Effet de la constante de temps τ de l'approche (13 vols par ligne, tous posés).</caption>
+<thead><tr><th>τ</th><th>Contrôleur</th><th>Poursuite moyenne</th><th>Écart max après rattrapage</th><th>Écart au contact max</th></tr></thead>
+<tbody>
+<tr class="em"><td>1 s</td><td>agent</td><td>8,7 s</td><td>20 cm</td><td>3,7 cm</td></tr>
+<tr><td>1 s</td><td>PD</td><td>8,3 s</td><td>20 cm</td><td>4,3 cm</td></tr>
+<tr><td>0,5 s</td><td>agent</td><td>8,0 s</td><td>30 cm</td><td>3,0 cm</td></tr>
+<tr><td>0,5 s</td><td>PD</td><td>9,9 s</td><td>66 cm</td><td>3,8 cm</td></tr>
+<tr><td>0,25 s</td><td>agent</td><td>9,0 s</td><td>20 cm</td><td>3,5 cm</td></tr>
+<tr><td>0,25 s</td><td>PD</td><td>9,2 s</td><td>22 cm</td><td>4,6 cm</td></tr>
+</tbody></table>
+<p>Un τ plus court ne rend pas l'approche plus rapide : le drone est déjà à sa limite avec τ = 1 s (θ sature à 0,2 rad, soit environ 2 m/s²), et un τ court exige une vitesse de consigne infaisable, Δ<sub>0</sub>/(e·τ) = 2,5 m/s pour τ = 1 s, 5 m/s pour 0,5 s et 10 m/s pour 0,25 s, qui crée du dépassement. À τ = 0,5 s, l'agent encaisse cette consigne infaisable bien mieux que le PD (30 cm contre 66 cm), comme à l'étape C2. <strong>On garde τ = 1 s.</strong></p>
+<figure class="m"><img src="figures/comparaison_approche.png" alt="Effet de tau"><figcaption>Effet de la constante de temps τ de la consigne d'approche sur l'agent et sur le PD.</figcaption></figure>
+<p><strong>Correction du biais de l'agent <i>x</i>.</strong> La sortie de l'agent à l'équilibre vaut <i>a</i>(0) = 0,035, soit 7 mrad de <i>θ</i><sub>ref</sub> : sur une cible fixe, cela laisse −1 cm à 1 s et −0,76 cm à 5 s, et l'intégrale conditionnelle met environ 20 s à l'effacer. On retranche donc <i>a</i>(0) à la sortie (<i>a</i> ← <i>a</i> − <i>a</i>(0)), sans réentraînement. Sur 13 voitures avec cap fixe, la poursuite dure en moyenne 8,4 s au lieu de 8,7 s (maximum 9,6 s au lieu de 12,6 s), le dépassement restant sous 3,7 cm. Le biais s'accompagne d'une linéarisation en 0 plus raide que celle du PD : 0,41 rad/m sur l'erreur de position contre 0,30, et 0,59 contre 0,45 sur l'erreur de vitesse.</p>
+<p><strong>Cap orienté vers la voiture.</strong> Pendant la poursuite, avec <i>d</i> la distance drone–voiture et β = sat((<i>d</i> − 1 m)/(2 m − 1 m), 0, 1), le cap visé est ψ<sub>visé</sub> = cap<sub>v</sub> + β·wrap(gisement − cap<sub>v</sub>). Au-delà de 2 m (β = 1), le drone vise la voiture ; en deçà de 1 m (β = 0), il prend le cap de la voiture ; entre les deux, la transition est douce, ce qui évite le gisement, mal défini au-dessus de la voiture. La vitesse de cap est ω<sub>ref</sub> = sat(1,0·wrap(ψ<sub>visé</sub> − ψ<sub>ref</sub>) + (1 − β)·<i>v<sub>v</sub></i>·κ<sub>v</sub>, ±0,5 rad/s) : le terme <i>v<sub>v</sub></i>·κ<sub>v</sub> anticipe la rotation de la voiture dans les virages, et ω<sub>ref</sub> reste dans la plage d'entraînement de l'agent de lacet (±1,5 rad/s). La descente exige en plus |ψ − cap<sub>v</sub>| &lt; 0,05 rad (3°). La rotation par ψ de l'étape C3 répartit automatiquement l'effort entre θ et φ, quel que soit le cap. Sur la voiture nominale, le cap passe de 0° à +50° dans le virage à gauche, puis revient vers +4°.</p>
+
+<h3>19.6 Configuration finale sur Simulink</h3>
+<p>Avec τ = 1 s, le cap vers la voiture et le biais corrigé, la vérification MATLAB = Python est OK sur 1200 pas et l'écart de position entre Simulink et Python est de 7 mm au maximum.</p>
+<table>
+<caption>Mission finale (configuration finale), vols Simulink.</caption>
+<thead><tr><th>Vol</th><th>Poursuite</th><th>Posé</th><th>Écart au contact</th><th>Vitesse relative</th><th><i>v<sub>z</sub></i> au contact</th><th>Écart de cap au contact</th><th>Écart max en descente</th></tr></thead>
+<tbody>
+<tr><td>Agents, <i>g</i> = 0</td><td>9,30 s</td><td>29,95 s</td><td>0,6 cm</td><td>0,4 cm/s</td><td>−0,100 m/s</td><td>+0,03°</td><td>3,1 cm</td></tr>
+<tr class="em"><td>Agents, <i>g</i> = 0,1</td><td>9,35 s</td><td>30,10 s</td><td>0,8 cm</td><td>1,3 cm/s</td><td>−0,106 m/s</td><td>−0,20°</td><td>3,9 cm</td></tr>
+<tr><td>PD <i>x</i>/<i>y</i>, <i>g</i> = 0</td><td>8,45 s</td><td>29,10 s</td><td>0,7 cm</td><td>1,3 cm/s</td><td>−0,100 m/s</td><td>+0,03°</td><td>2,7 cm</td></tr>
+<tr><td>PD <i>x</i>/<i>y</i>, <i>g</i> = 0,1</td><td>9,65 s</td><td>30,40 s</td><td>0,4 cm</td><td>2,4 cm/s</td><td>−0,103 m/s</td><td>−0,28°</td><td>3,6 cm</td></tr>
+</tbody></table>
+<p>L'écart de cap au posé passe de −40° (première version) à moins de 0,3°. La robustesse est mesurée en simulation Python sur 13 voitures (<i>g</i> = 0,1, configuration finale), une fois le biais corrigé et le critère rendu équitable :</p>
+<table>
+<caption>Robustesse sur 13 voitures aléatoires, <i>g</i> = 0,1 (Python).</caption>
+<thead><tr><th></th><th>Agent</th><th>PD</th></tr></thead>
+<tbody>
+<tr><td>Posé</td><td>13/13</td><td>13/13</td></tr>
+<tr><td>Poursuite moyenne (max)</td><td><strong>9,2 s</strong> (11,0)</td><td>9,8 s (10,8)</td></tr>
+<tr><td>Dépassement de la voiture max</td><td><strong>4,3 cm</strong></td><td>5,0 cm</td></tr>
+<tr><td>Écart au contact max</td><td><strong>3,7 cm</strong></td><td>4,7 cm</td></tr>
+<tr><td>Vitesse relative max</td><td><strong>3,1 cm/s</strong></td><td>4,6 cm/s</td></tr>
+</tbody></table>
+<p><strong>L'agent est meilleur que le PD sur tous les indicateurs de la robustesse.</strong> Le simulateur Python, assemblé uniquement à partir des modèles identifiés (GRU de <i>z</i>, GRU du lacet, ARX θ/φ avec LQ, translation dans le repère du sol tournée par le ψ réel), prédit le vol Simulink à 7 mm près. Les agents <i>z</i> et lacet servent dans tous les vols : altitude tenue à 3–17 mm, descente à −0,10 m/s exactement, scan sans dérive.</p>
+<figure class="t"><img src="figures/mission_simulink_cap.png" alt="Mission finale sur Simulink"><figcaption>Mission finale, configuration finale, vol Simulink : vue de dessus (rond : début de poursuite ; triangle : début de descente ; étoile : posé), altitude et phases, écart horizontal en échelle logarithmique, cap et inclinaisons (ψ, ψ<sub>ref</sub> et cap de la voiture).</figcaption></figure>
+<figure class="t"><img src="figures/sim_mission_cap.png" alt="Mission finale en Python"><figcaption>Même mission dans le simulateur Python assemblé à partir des modèles identifiés.</figcaption></figure>
+
+<h3>19.7 Animation</h3>
+<p>L'animation est tirée du vol Simulink (agents, <i>g</i> = 0,1), en temps réel à 10 images par seconde, de la fin du scan jusqu'à 2 s après le posé (17 s). Elle montre une vue de dessus centrée entre le drone et la voiture (zoom qui suit leur distance, drone à quatre rotors dont la couleur donne la phase : poursuite en bleu, descente en orange, posé en vert), une vue d'ensemble de la trajectoire, et l'altitude avec l'écart horizontal. Dans le HTML, elle est animée ; dans le PDF, trois vignettes la remplacent (début de poursuite, descente, posé). Fichier : <code>python/resultats/mission/animation_mission.gif</code>, copie dans <code>rapport/animation_mission.gif</code>.</p>
+<figure class="screen-only"><img src="animation_mission.gif" alt="Animation de la mission" style="max-height:none"><figcaption>Animation de la mission finale (vol Simulink, agents, <i>g</i> = 0,1).</figcaption></figure>
+<figure class="print-only t"><img src="figures/animation_vignettes.png" alt="Vignettes de l'animation" style="max-height:none"><figcaption>Trois images de l'animation de la mission (début de poursuite à 17,4 s, descente à 26,1 s, posé à 32,1 s). L'animation complète est dans <code>python/resultats/mission/animation_mission.gif</code>.</figcaption></figure>
+<div class="note warn"><span class="label">Limite du modèle</span><p><code>UAV_model</code> n'a pas de sol, et la position de la voiture est supposée connue après le scan (pas de vision). « Posé » veut dire : arrivé à la hauteur de la plateforme, aligné, à vitesse relative quasi nulle.</p></div>
+
+<h1 class="part"><span>Partie IV</span>Comparaison : LQI double intégrateur, LQ sur modèle ARX, agent RL</h1>
+<h2>20. Comparaisons contrôleur par contrôleur</h2>
+<p>Cette section répond à la question centrale du projet : que gagne-t-on à apprendre un agent plutôt qu'à calculer un régulateur ? Elle compare, axe par axe puis sur la mission, trois familles de contrôleurs :</p>
+<ul>
+<li><strong>LQI double intégrateur</strong> : le régulateur à action intégrale calculé sur un modèle d'état double intégrateur (sections 2 à 4), avec les gains réajustés pour 20 Hz (voir 20.1) ;</li>
+<li><strong>LQ sur modèle ARX</strong> : un régulateur LQ synthétisé sur le modèle ARX identifié, qui contient la dynamique des moteurs et le retard. Il a été construit pour cette comparaison avec la même méthode que le LQ d'attitude de l'étape C1 (<code>python/identification/lq_arx.py</code> pour <i>z</i> et le lacet) ;</li>
+<li><strong>agent RL</strong> : les agents PPO retenus.</li>
+</ul>
+<p>Tous sont évalués <strong>sur le même drone simulé</strong> (les modèles identifiés : GRU de <i>z</i> et du lacet, ARX de l'attitude), à 20 Hz, avec un bruit de mesure équivalent à <i>g</i> = 0,1 pour les indicateurs « bruit ». Le script est <code>python/evaluation/comparaisons_LQI_ARX_RL.py</code>, et les résultats sont dans <code>python/resultats/comparaisons/</code>. Un seul indicateur, la mission LQ, vient de Simulink (le modèle <code>mission_LQ.slx</code> , en continu).</p>
+
+<h3>20.1 Le LQI double intégrateur à 20 Hz : réajustement des gains</h3>
+<p>Les gains de <code>gains_LQI.m</code> sont réglés et validés sur les modèles Simulink du LQI, où le LQI est <strong>continu</strong> (solveur à pas variable, sans bloqueur d'ordre zéro). Échantillonnés à <i>T<sub>s</sub></i> = 0,05 s, comme dans l'interface RL et dans toutes les comparaisons, ils subissent un retard d'environ un demi-pas, qui s'ajoute à celui des moteurs : <i>z</i> oscille et θ diverge. Ce n'est pas le réglage qui est en cause, c'est son implantation à 20 Hz. Comparer l'agent à ces gains bruts aurait faussé la comparaison, et leurs courbes écrasaient l'échelle des graphes ; elles ont été retirées.</p>
+<p>Méthode : <code>commande_LQ/reponses_LQI_simulink.m</code> enregistre, sans bruit, les réponses Simulink des LQI d'origine (<code>test_LQI_z</code>, <code>test_LQI_psi</code>, <code>test_LQI_x</code>) ; <code>python/identification/reajuster_gains_LQI.py</code> garde <strong>exactement la même loi de commande</strong> et recale (<i>K<sub>p</sub></i>, <i>K<sub>d</sub></i>, <i>K<sub>i</sub></i>) par moindres carrés (Nelder-Mead), pour que la réponse à 20 Hz sur les modèles identifiés reproduise la réponse Simulink. Pour le lacet, la rampe d'origine du modèle (18 rad/s pendant 10 s) est remplacée, en mémoire seulement, par le scan (un tour en 8 s) ; le fichier <code>.slx</code> n'est pas modifié. Les gains sont dans <code>python/modeles/gains_LQI_20Hz.json</code>.</p>
+<table>
+<caption>Gains du LQI double intégrateur avant et après réajustement pour 20 Hz, et écart RMS à la réponse Simulink continue.</caption>
+<thead><tr><th>Axe</th><th>Gains d'origine (<i>K<sub>p</sub></i> / <i>K<sub>d</sub></i> / <i>K<sub>i</sub></i>)</th><th>Gains réajustés (<i>K<sub>p</sub></i> / <i>K<sub>d</sub></i> / <i>K<sub>i</sub></i>)</th><th>Écart RMS à Simulink (origine → réajusté)</th></tr></thead>
+<tbody>
+<tr><td><i>z</i></td><td>1,856 / 0,882 / 0,787</td><td>1,195 / 0,765 / 0,695</td><td>5,2 → 2,6 cm</td></tr>
+<tr><td>ψ</td><td>0,252 / 0,125 / 0,097</td><td>0,226 / 0,115 / 0,090</td><td>0,004 → 0,001 rad (déjà quasi identique)</td></tr>
+<tr><td>θ</td><td>0,443 / 0,130 / 0,280</td><td>0,189 / 0,078 / 0,078</td><td>1,06 rad (diverge) → 0,021 rad</td></tr>
+</tbody></table>
+<figure class="t"><img src="figures/reajustement_gains_LQI.png" alt="Réajustement des gains du LQI"><figcaption>LQI double intégrateur pour <i>z</i>, ψ et θ : réponse Simulink continue, réponse à 20 Hz avec les gains d'origine (θ diverge, tracé borné) et avec les gains réajustés.</figcaption></figure>
+<p>Le dépassement de 15° du LQI de lacet en fin de scan existe aussi sur Simulink : il tient au réglage (l'intégrale se charge pendant la rampe), pas à l'échantillonnage. Dans la suite, « LQI double intégrateur » désigne ce LQI à gains réajustés.</p>
+<figure class="t"><img src="figures/comparaison_synthese.png" alt="Synthèse des comparaisons"><figcaption>Synthèse (mesures bruitées, <i>g</i> = 0,1) : RMSE sur la PRBS longue pour <i>z</i> et <i>x</i>, erreur pendant le scan pour le lacet. Rouge : LQI double intégrateur (gains réajustés) ; vert : LQ sur modèle ARX ; bleu : agent RL.</figcaption></figure>
+
+<h3>20.2 Altitude z</h3>
+<table>
+<caption>Altitude <i>z</i> : échelon de 0,5 m, mission de la Figure 1 et PRBS longue.</caption>
+<thead><tr><th>Contrôleur</th><th>Montée</th><th>Dépassement</th><th>RMSE Fig. 1 (bruit)</th><th>RMSE PRBS (bruit)</th><th>Bande passante</th></tr></thead>
+<tbody>
+<tr><td>LQI double intégrateur (gains réajustés à 20 Hz)</td><td>0,85 s</td><td>24,9 %</td><td>11,7 cm</td><td>8,3 cm</td><td>0,47 Hz</td></tr>
+<tr><td>LQ sur modèle ARX</td><td>0,65 s</td><td>10,0 %</td><td>5,9 cm</td><td>5,6 cm</td><td>1,25 Hz</td></tr>
+<tr class="em"><td>Agent PPO <i>z</i></td><td>0,85 s</td><td>0,2 %</td><td>3,1 cm</td><td>2,7 cm</td><td>2,34 Hz</td></tr>
+</tbody></table>
+<p>L'agent divise l'erreur sur la PRBS par 3,1 par rapport au LQI double intégrateur et par 2 par rapport au LQ sur ARX, et il ne dépasse presque pas (0,2 % contre 25 % et 10 %). Le LQ sur ARX est monté un peu plus vite que l'agent (0,65 s contre 0,85 s), au prix de 10 % de dépassement. L'ARX de <i>z</i> reste moins fidèle que le GRU (RMSE en simulation libre de 0,82 m/s², la poussée étant non linéaire), ce qui explique ces 10 % et justifie le choix d'un GRU pour <i>z</i>.</p>
+<figure class="t"><img src="figures/comparaison_z.png" alt="Comparaison en z"><figcaption>Altitude <i>z</i> : échelon, mission de la Figure 1 et PRBS longue pour les trois contrôleurs.</figcaption></figure>
+
+<h3>20.3 Lacet ψ</h3>
+<table>
+<caption>Lacet : scan de 360°, PRBS et bande passante.</caption>
+<thead><tr><th>Contrôleur</th><th>Erreur pendant le scan (bruit)</th><th>Dépassement en fin de tour</th><th>RMSE PRBS (bruit)</th><th>Bande passante (vitesse)</th></tr></thead>
+<tbody>
+<tr><td>LQI double intégrateur (gains réajustés à 20 Hz)</td><td>9,75°</td><td>15,0°</td><td>8,0°</td><td>0,55 Hz</td></tr>
+<tr><td>LQ sur modèle ARX</td><td>0,65°</td><td>0,0°</td><td>2,5°</td><td>&gt; 1,64 Hz</td></tr>
+<tr class="em"><td>Agent PPO lacet</td><td>0,39°</td><td>0,1°</td><td>1,9°</td><td>&gt; 1,64 Hz</td></tr>
+</tbody></table>
+<p>Sur le lacet, les gains d'origine étaient déjà quasi identiques à Simulink une fois échantillonnés ; l'écart vient donc du modèle et du réglage : passer du LQI au LQ sur ARX divise l'erreur du scan par 15, et le dépassement de 15° du LQI (l'intégrale se charge pendant la rampe) disparaît. L'agent gagne encore 40 % sur ce LQ.</p>
+<figure class="t"><img src="figures/comparaison_psi.png" alt="Comparaison en lacet"><figcaption>Lacet : scan de 360°, PRBS et réponse en fréquence des trois contrôleurs.</figcaption></figure>
+
+<h3>20.4 Attitude θ</h3>
+<table>
+<caption>Attitude θ : échelon de 0,1 rad sur l'ARX, à 20 Hz.</caption>
+<thead><tr><th>Contrôleur</th><th>Montée</th><th>Dépassement</th><th>Temps de réponse à 2 %</th><th>Diverge</th></tr></thead>
+<tbody>
+<tr><td>LQI double intégrateur (gains réajustés à 20 Hz)</td><td>0,25 s</td><td>32 %</td><td>—</td><td>non (oscillation lente)</td></tr>
+<tr><td>LQ sur ARX, réglage C1 (lent)</td><td>0,85 s</td><td>0 %</td><td>1,45 s</td><td>non</td></tr>
+<tr class="em"><td>LQ sur ARX, réglage rapide (boucle interne)</td><td>0,30 s</td><td>3 %</td><td>0,80 s</td><td>non</td></tr>
+</tbody></table>
+<p>Avec ses gains d'origine, le LQI double intégrateur <strong>diverge</strong> à 20 Hz sur l'ARX (section 20.1). Réajusté, il est stable, monte en 0,25 s, mais dépasse de 32 % et oscille lentement : il ignore le retard des moteurs, que le LQ sur ARX prend en compte (3 % de dépassement pour 0,30 s de montée). Aucun agent n'est entraîné sur l'attitude : le LQ rapide sur ARX est la boucle interne commune des contrôleurs de position.</p>
+<figure class="m"><img src="figures/comparaison_attitude.png" alt="Comparaison en attitude"><figcaption>Attitude θ : échelon de 0,1 rad pour le LQI double intégrateur (gains réajustés) et les deux réglages du LQ sur ARX.</figcaption></figure>
+
+<h3>20.5 Position x</h3>
+<p>La cascade LQI garde le LQI de θ (gains réajustés) en boucle interne, pour rester fidèle ; le PD réglé sur l'ARX et l'agent utilisent le LQ sur ARX rapide.</p>
+<table>
+<caption>Position <i>x</i> : dépassements, retard sur une voiture à 0,3 m/s, PRBS et bande passante.</caption>
+<thead><tr><th>Contrôleur</th><th>Dépassement 2 m</th><th>Dépassement 5 m</th><th>Dépassement voiture</th><th>Retard sur la voiture</th><th>RMSE PRBS (bruit)</th><th>Bande passante</th></tr></thead>
+<tbody>
+<tr><td>Cascade LQI : PD 0,23/0,28 + le LQI θ réajusté</td><td>0,0 %</td><td>0,0 %</td><td>0,0 cm</td><td>36,4 cm</td><td>26,4 cm</td><td>0,31 Hz</td></tr>
+<tr><td>PD réglé sur l'ARX : 0,3/0,45 + anticipation</td><td>0,4 %</td><td>0,2 %</td><td>9,8 cm</td><td>0,1 cm</td><td>7,3 cm</td><td>1,17 Hz</td></tr>
+<tr class="em"><td>Agent PPO <i>x</i> (entraîné aux saturations)</td><td>0,1 %</td><td>0,0 %</td><td>1,7 cm</td><td>0,2 cm</td><td>6,0 cm</td><td>1,48 Hz</td></tr>
+</tbody></table>
+<p>La cascade LQI ne dépasse jamais, mais elle traîne : 36 cm de retard sur une voiture à 0,3 m/s et 26,4 cm de RMSE sur la PRBS. Régler le PD sur l'ARX et ajouter l'anticipation de vitesse supprime ce retard, au prix de 9,8 cm de dépassement sur la voiture. L'agent obtient le même retard (0,2 cm) avec 1,7 cm de dépassement, et la meilleure bande passante.</p>
+<figure class="t"><img src="figures/comparaison_x.png" alt="Comparaison en x"><figcaption>Position <i>x</i> : échelons, rattrapage d'une voiture et PRBS pour la cascade LQI, le PD réglé sur l'ARX et l'agent.</figcaption></figure>
+
+<h3>20.6 Mission d'atterrissage sur une voiture rectiligne (0,3 m/s)</h3>
+<table>
+<caption>Atterrissage sur une voiture rectiligne : mission LQ contre mission RL.</caption>
+<thead><tr><th>Mission</th><th>Bruit</th><th>Posé à</th><th>Écart au contact</th><th>Vitesse relative</th></tr></thead>
+<tbody>
+<tr><td>LQ (Simulink, <code>mission_LQ.slx</code>)</td><td><i>g</i> = 0</td><td>41,0 s</td><td>0,9 cm</td><td>0,3 cm/s</td></tr>
+<tr><td>LQ (Simulink, <code>mission_LQ.slx</code>)</td><td><i>g</i> = 0,01</td><td>41,0 s</td><td>0,8 cm</td><td>0,1 cm/s</td></tr>
+<tr><td>LQ (Simulink, <code>mission_LQ.slx</code>)</td><td><i>g</i> = 0,1</td><td>41,1 s</td><td>0,9 cm</td><td>0,9 cm/s</td></tr>
+<tr class="em"><td>RL (agents, simulateur assemblé)</td><td><i>g</i> = 0</td><td>29,7 s</td><td>0,1 cm</td><td>0,1 cm/s</td></tr>
+<tr class="em"><td>RL (agents, simulateur assemblé)</td><td><i>g</i> = 0,1</td><td>29,7 s</td><td>0,2 cm</td><td>1,0 cm/s</td></tr>
+</tbody></table>
+<p>Les deux missions se posent au centimètre. La mission RL le fait environ 11 s plus tôt, soit 28 % de temps en moins. Les deux ne sont pas strictement comparables : la mission LQ est celle de Simulink, la mission RL est évaluée sur le simulateur assemblé, qui prédit les vols Simulink à 7 mm près (section 19).</p>
+<figure class="t"><img src="figures/comparaison_mission.png" alt="Comparaison sur la mission"><figcaption>Atterrissage sur une voiture rectiligne : mission LQ et mission RL.</figcaption></figure>
+
+<h3>20.7 Ce qu'il faut retenir</h3>
+<ul>
+<li>Avec ses gains <strong>adaptés à 20 Hz</strong>, le LQI double intégrateur fonctionne sur les trois axes : le problème de départ était l'implantation échantillonnée de gains réglés en continu, pas le réglage. L'écart restant avec le LQ sur ARX et avec le RL vient du <strong>modèle</strong> double intégrateur, qui ignore la dynamique des moteurs : sur l'attitude, 32 % de dépassement contre 3 % ; sur le lacet, 15° de dépassement contre 0° ; sur <i>z</i>, 8,3 cm de RMSE contre 5,6 cm.</li>
+<li>L'<strong>agent RL</strong> apporte un gain supplémentaire, surtout sur les dépassements et sur la bande passante : 2 fois moins d'erreur sur <i>z</i> que le meilleur LQ, 0,2 % de dépassement sur <i>z</i>, 1,7 cm contre 9,8 cm de dépassement sur la voiture en <i>x</i>.</li>
+<li>Sur la mission finale, le gain de l'agent <i>x</i> sur un PD bien réglé est modeste (section 19) ; celui des agents <i>z</i> et lacet est net.</li>
+<li>Le LQ sur ARX est un excellent point de comparaison : rapide à calculer (quelques secondes contre quelques minutes d'entraînement), mais il hérite des limites linéaires du modèle, d'où ses 10 % de dépassement sur <i>z</i>.</li>
+</ul>
+
+<h1 class="part"><span>Partie V</span>Organisation du code et suite</h1>
+<h2>21. Organisation du code et reproductibilité</h2>
+<p>Le code est organisé par fonction (identification, environnements, entraînement, évaluation, export), avec un dossier de vols Simulink par étape.</p>
+<div class="eq">quadrirotor-RL/
+├── README.md, GUIDE.md          vue d'ensemble, et quel fichier lancer
+├── verifier_installation.m      vérification MATLAB complète (≈ 3 min)
+├── Matlab files/                FOURNI : UAV_model.slx, EINT_system_simulation.slx, random_init.m
+├── rl_interface/                FOURNI : EINT_RL_closed_loop.slx, EINT_RL_eval.m, rl_controller.m (complété)
+├── donnees/                     brutes / nettoyees / lacet / attitude
+├── generation_donnees/          génération des données du lacet et de l'attitude, essais d'interface
+├── commande_LQ/                 LQI double intégrateur, LQ sur ARX de l'attitude, mission LQ
+├── python/                      identification, environnements, entrainement, evaluation,
+│                                export, tests, modeles, resultats
+├── simulink_RL/                 vols Simulink des agents : z, zpsi, x, xy, mission
+└── rapport/                     ce compte rendu (PDF, HTML), figures et animations</div>
+<p><strong>Fichiers fournis.</strong> <code>Matlab files/</code>, <code>rl_interface/</code> et le PDF du sujet sont laissés en place et sous leur nom. Trois modifications : le bruit de θ est corrigé dans <code>UAV_model.slx</code> (l'original est <code>UAV_model.slx.r2024a</code>), les consignes de <code>EINT_system_simulation.slx</code> sont modifiées (original en <code>.r2024a</code>), et <code>rl_controller.m</code> est complété pour l'agent <i>z</i>, comme le demande le sujet.</p>
+<p><strong>Conventions.</strong> Même fonction, même nom, le suffixe indiquant la variable ou l'étape : <code>env_z.py</code>, <code>train_ppo_psi.py</code>, <code>export_xy.py</code>, <code>EINT_RL_eval_mission.m</code>, <code>verifier_x.m</code>. « LQI » désigne la commande synthétisée sur un modèle double intégrateur, avec intégrale ; « LQ_ARX » désigne la commande synthétisée sur le modèle ARX. Les agents retenus sont dans <code>python/resultats/agent_*</code>, et leurs chemins sont déclarés une seule fois dans <code>python/chemins.py</code>.</p>
+<p><strong>Vérification.</strong> <code>verifier_installation.m</code> ne signale aucune anomalie : les quatre modèles LQI et la mission LQ simulent ; les cinq étapes RL vérifient MATLAB = Python pas à pas ; les modèles <code>EINT_RL_closed_loop_&lt;étape&gt;.slx</code> sont reconstruits ; les sept tests Python passent. Les vols Simulink bruités utilisent <code>random_init</code> (graines aléatoires) : en les relançant, les chiffres bruités varient légèrement, alors que les vols sans bruit, les vérifications et toutes les simulations Python sont déterministes. Environnement : Python 3.12 (<code>pip install -r requirements.txt</code>), MATLAB R2025b avec Simulink et la Control System Toolbox.</p>
+
+<h2>22. Annexe : mode d'emploi</h2>
+<p>Toutes les commandes Python se lancent depuis la racine du dépôt ou depuis n'importe quel dossier (les chemins sont gérés par <code>python/chemins.py</code>). Les scripts MATLAB se lancent par F5 ou par <code>run(...)</code>, chacun ajoutant ses propres chemins. Les agents, les modèles identifiés et les exports sont déjà dans le dépôt : on peut vérifier, voler et comparer sans rien réentraîner.</p>
+<table class="ref">
+<caption>Quel fichier lancer, selon ce que l'on veut faire.</caption>
+<thead><tr><th>Je veux…</th><th>Lancer</th></tr></thead>
+<tbody>
+<tr><td>vérifier tout le MATLAB (≈ 3 min)</td><td><code>verifier_installation.m</code></td></tr>
+<tr><td>vérifier les environnements Python</td><td><code>python python/tests/test_env_z_3a.py</code> (et les autres <code>test_*.py</code>)</td></tr>
+<tr><td>calculer les gains du LQI</td><td><code>commande_LQ/gains_LQI.m</code>, <strong>avant</strong> d'ouvrir un <code>test_LQI_*.slx</code></td></tr>
+<tr><td>faire la mission LQ (voiture rectiligne)</td><td><code>commande_LQ/mission_LQ/essai_mission_LQ.m</code></td></tr>
+<tr><td>synthétiser puis tester le LQ d'attitude sur l'ARX</td><td><code>commande_LQ/LQ_ARX_attitude/gains_LQ_ARX_attitude.m</code>, puis <code>test_LQ_ARX_attitude.m</code></td></tr>
+<tr><td>synthétiser les LQ sur ARX de <i>z</i> et du lacet</td><td><code>python python/identification/lq_arx.py</code></td></tr>
+<tr><td>générer les données du lacet ou de l'attitude</td><td><code>generation_donnees/generation_donnees_psi.m</code>, <code>generation_donnees_attitude.m</code> (5 à 20 min)</td></tr>
+<tr><td>identifier z (GRU), le lacet, l'attitude</td><td><code>python/identification/identification_z.py</code>, <code>identification_psi.py</code>, <code>identification_attitude.py</code></td></tr>
+<tr><td>entraîner les agents (facultatif)</td><td><code>python/entrainement/train_ppo_z.py</code> (1,5 min), <code>train_ppo_psi.py</code> (3,6 min), <code>train_ppo_x.py</code> (7 min), <code>train_ppo_x_saturation.py</code> (13 min), <code>train_sac_z.py</code> (28 min, historique)</td></tr>
+<tr><td><strong>comparer LQI / LQ ARX / RL</strong></td><td><code>python python/evaluation/comparaisons_LQI_ARX_RL.py</code> (≈ 6 min)</td></tr>
+<tr><td>les PRBS longs (ou courts)</td><td><code>python python/evaluation/essais_prbs.py</code> (<code>--court</code>)</td></tr>
+<tr><td>la référence PD de <i>x</i></td><td><code>python python/evaluation/reference_pd_x.py</code></td></tr>
+<tr><td>la position (<i>x</i>, <i>y</i>) avec rotation par ψ</td><td><code>python python/environnements/sim_xy.py</code>, puis <code>python python/evaluation/essais_prbs_xy.py</code></td></tr>
+<tr><td>la mission complète (nominale + 12 voitures)</td><td><code>python python/environnements/sim_mission.py</code></td></tr>
+<tr><td>l'effet de τ et du cap</td><td><code>python python/evaluation/comparaison_approche_mission.py</code></td></tr>
+<tr><td>l'animation GIF de la poursuite</td><td><code>python python/evaluation/animation_mission.py</code></td></tr>
+</tbody></table>
+<table class="ref">
+<caption>Export puis vol Simulink : chaque export écrit les politiques et un vol Python de référence, le script MATLAB vérifie d'abord qu'il le rejoue à l'identique, puis il vole.</caption>
+<thead><tr><th>Étape</th><th>1. Export Python</th><th>2. Vol Simulink (MATLAB)</th></tr></thead>
+<tbody>
+<tr><td>z (Figure 1)</td><td><code>python/export/export_z.py</code></td><td><code>simulink_RL/z/vols_z.m</code> (ou <code>rl_interface/EINT_RL_eval.m</code>)</td></tr>
+<tr><td>z + lacet (scan)</td><td><code>python/export/export_zpsi.py</code></td><td><code>simulink_RL/zpsi/EINT_RL_eval_zpsi.m</code> ou <code>vols_zpsi.m</code></td></tr>
+<tr><td>z + lacet + x</td><td><code>python/export/export_x.py</code></td><td><code>simulink_RL/x/EINT_RL_eval_x.m</code></td></tr>
+<tr><td>position (<i>x</i>, <i>y</i>)</td><td><code>python/export/export_xy.py</code></td><td><code>simulink_RL/xy/EINT_RL_eval_xy.m</code></td></tr>
+<tr><td><strong>mission finale</strong></td><td><code>python/export/export_mission.py</code></td><td><code>simulink_RL/mission/EINT_RL_eval_mission.m</code>, puis <code>graphes_mission.m</code></td></tr>
+</tbody></table>
+<p>Pour changer le bruit des vols Simulink, on modifie <code>g_noise</code> dans le script <code>EINT_RL_eval_*.m</code> ou <code>vols_*.m</code>. Pour changer la mission finale (altitude, durée du scan, tolérances, descente), on modifie les constantes en tête de <code>python/environnements/sim_mission.py</code> <strong>et</strong> de <code>simulink_RL/mission/rl_controller_mission.m</code>, qui doivent rester identiques, puis on refait l'export et le vol. La trajectoire de la voiture est <code>VOITURE_MISSION</code> dans <code>python/environnements/voiture.py</code> ; le cap et la correction du biais sont <code>CONFIG_FINALE</code> (Python) et <code>CAP_VOITURE</code>, <code>CORR_BIAIS</code> (<code>rl_controller_mission.m</code>).</p>
+
+<h2>23. Limites et points à traiter</h2>
+<p>Points qui restent à traiter :</p>
+<ol class="todo">
+<li><strong>Comparer le LQI et l'agent sur la mission de la Figure 1 sur Simulink</strong> : la comparaison de la section 20 est faite sur le drone simulé à partir des modèles identifiés ; seul le PPO a volé cette mission sur Simulink.</li>
+<li>Valider le <strong>LQI de lacet</strong> sur Simulink (gains calculés pour ψ en radians) et vérifier dans <code>test_LQI_psi.slx</code> la pente de la rampe de consigne de ψ : 18 vaut 18 rad/s si ψ est en radians, alors que 18°/s vaudrait 0,31 rad/s.</li>
+<li><strong>Sol et contact</strong> : <code>UAV_model</code> n'a pas de sol ; le posé est défini par la hauteur, l'alignement et la vitesse relative. Un modèle de contact serait nécessaire pour un atterrissage réel.</li>
+<li><strong>Perception</strong> : la position et la vitesse de la voiture sont supposées connues après le scan.</li>
+<li><strong>Accélération de la voiture</strong> : elle n'est dans l'observation d'aucun contrôleur (retard de 1,8 cm sur une cible qui accélère à 0,0625 m/s²). L'ajouter à l'observation de l'agent supposerait un réentraînement.</li>
+<li><strong>Biais de l'agent <i>x</i></strong> : il est corrigé en retranchant <i>a</i>(0) ; un réentraînement avec une récompense qui pénalise la sortie à l'équilibre le supprimerait à la source.</li>
+<li>Optionnel : réduire l'agitation de <i>u</i> à fort bruit (bruit tiré au hasard à chaque vol à l'entraînement, ou pénalité accrue sur Δ<i>u</i>), et entraîner sur des missions aléatoires à plusieurs paliers.</li>
+</ol>
+
+<h3>Fichiers de référence</h3>
+<table class="ref">
+<thead><tr><th>Contenu</th><th>Fichier</th></tr></thead>
+<tbody>
+<tr><td>Nettoyage des données</td><td><code>donnees/nettoyees/</code></td></tr>
+<tr><td>LQI altitude, lacet, attitude, PD de position</td><td><code>commande_LQ/gains_LQI.m</code>, <code>commande_LQ/test_LQI_{z,psi,x,y}.slx</code>, <code>python/identification/identification_gain_k.py</code></td></tr>
+<tr><td>Modèle GRU de <i>z</i> et environnement</td><td><code>python/identification/identification_z.py</code>, <code>python/modeles/z/</code>, <code>python/environnements/env_z.py</code></td></tr>
+<tr><td>Entraînements de <i>z</i></td><td><code>python/entrainement/train_sac_z.py</code>, <code>train_ppo_z.py</code>, <code>python/resultats/agent_z_sac/</code>, <code>agent_z_ppo/</code></td></tr>
+<tr><td>Vol de <i>z</i> sur Simulink (Figure 1)</td><td><code>python/export/export_z.py</code>, <code>simulink_RL/z/</code>, <code>rl_interface/</code></td></tr>
+<tr><td>Interface du drone (étape A)</td><td><code>generation_donnees/essais_interface/</code></td></tr>
+<tr><td>Lacet (étapes B1 et B2)</td><td><code>generation_donnees/generation_donnees_psi.m</code>, <code>python/identification/identification_psi.py</code>, <code>python/modeles/psi/</code>, <code>python/environnements/env_psi.py</code>, <code>python/entrainement/train_ppo_psi.py</code>, <code>python/resultats/agent_psi_ppo/</code>, <code>python/export/export_zpsi.py</code>, <code>simulink_RL/zpsi/</code></td></tr>
+<tr><td>Attitude (étape C1)</td><td><code>generation_donnees/generation_donnees_attitude.m</code>, <code>python/identification/identification_attitude.py</code>, <code>python/modeles/attitude/</code>, <code>commande_LQ/LQ_ARX_attitude/</code>, <code>donnees/attitude/</code></td></tr>
+<tr><td>Cascade en <i>x</i> et mission LQ</td><td><code>commande_LQ/test_LQI_x.slx</code>, <code>commande_LQ/mission_LQ/</code></td></tr>
+<tr><td>Agent de position, PRBS et vol (étape C2)</td><td><code>python/environnements/env_x.py</code>, <code>python/evaluation/reference_pd_x.py</code>, <code>essais_prbs.py</code>, <code>python/entrainement/train_ppo_x*.py</code>, <code>python/export/export_x.py</code>, <code>python/resultats/agent_x_ppo*/</code>, <code>reference_pd_x/</code>, <code>essais_prbs_court/</code>, <code>essais_prbs_long/</code>, <code>simulink_RL/x/</code></td></tr>
+<tr><td>Position (<i>x</i>, <i>y</i>) (étape C3)</td><td><code>python/environnements/sim_xy.py</code>, <code>python/evaluation/essais_prbs_xy.py</code>, <code>python/export/export_xy.py</code>, <code>python/resultats/essais_xy/</code>, <code>simulink_RL/xy/</code></td></tr>
+<tr><td>Mission finale</td><td><code>python/environnements/sim_mission.py</code>, <code>voiture.py</code>, <code>python/evaluation/comparaison_approche_mission.py</code>, <code>animation_mission.py</code>, <code>python/export/export_mission.py</code>, <code>python/resultats/mission/</code>, <code>simulink_RL/mission/</code></td></tr>
+<tr><td>Comparaisons LQI / LQ ARX / RL</td><td><code>python/evaluation/comparaisons_LQI_ARX_RL.py</code>, <code>python/identification/lq_arx.py</code>, <code>python/resultats/comparaisons/</code></td></tr>
+<tr><td>Supports de présentation</td><td><code>rapport/presentation/</code>, <code>python/presentation/</code></td></tr>
+<tr><td>Figures et scripts de ce rapport</td><td><code>rapport/figures/</code>, <code>rapport/scripts/</code></td></tr>
+</tbody></table>
+
+<h2>24. Supports visuels et démonstrations (présentation finale)</h2>
+<p>Pour la présentation finale, des animations et des figures de synthèse ont été produites (dossier <code>rapport/presentation/</code>, scripts dans <code>python/presentation/</code>, description dans <code>rapport/presentation/LISEZMOI.md</code>). Les vols utilisent le simulateur assemblé à partir des modèles identifiés (le même que <code>sim_mission.py</code>), avec des mesures bruitées comme à <i>g</i> = 0,1 et un contrôleur à 20 Hz. Dans le HTML, les animations sont animées ; dans le PDF, chacune est remplacée par une vignette, et le GIF est cité par son chemin.</p>
+<p>Les <strong>trois familles</strong> comparées, sur tous les axes :</p>
+<table>
+<caption>Les trois familles de contrôleurs des démonstrations (superviseur, mélangeur et anticipation de poussée 1/cos communs).</caption>
+<thead><tr><th>Famille</th><th><i>z</i></th><th>Lacet ψ</th><th>Position</th><th>Attitude θ, φ</th></tr></thead>
+<tbody>
+<tr><td>Agents RL (PPO), bleu</td><td>agent <i>z</i></td><td>agent lacet</td><td>agent <i>x</i> sur les 2 axes du drone</td><td>LQ sur ARX</td></tr>
+<tr><td>LQ sur modèle ARX, vert</td><td>LQI sur ARX</td><td>LQ sur ARX</td><td>PD 0,3 / 0,45 + vitesse de consigne</td><td>LQ sur ARX</td></tr>
+<tr><td>LQI double intégrateur (gains réajustés à 20 Hz), rouge</td><td>LQI</td><td>LQI</td><td>PD 0,23 / 0,28 + vitesse de consigne</td><td>LQI</td></tr>
+</tbody></table>
+<div class="note"><span class="label">À ne pas confondre</span><p>Ici, « LQ sur ARX » est la famille complète (LQI sur ARX en <i>z</i>, LQ sur ARX en lacet, PD 0,3/0,45, LQ d'attitude). Ce n'est donc pas le « PD <i>x</i>/<i>y</i> » de la section 19, où les agents <i>z</i> et lacet restent en place et seule la position passe au PD.</p></div>
+
+<h3>24.1 Suivre une voiture à forts à-coups, sans atterrir</h3>
+<p>Le drone (agents RL) reste au-dessus d'une voiture qui démarre sec, freine, recule et repart, avec des accélérations jusqu'à 2 m/s², la limite physique du drone (θ<sub>max</sub> = 0,2 rad). Il décroche de 20 à 30 cm pendant environ 0,5 s, puis revient. Le second scénario est un slalom serré (rayon 1,2 m) suivi d'un demi-tour (rayon 0,9 m), où le drone tourne avec la voiture ; hors du premier démarrage, l'écart reste sous 10 cm.</p>
+<figure class="screen-only"><img src="presentation/01_suivi_ligne_droite.gif" alt="01_suivi_ligne_droite" style="max-height:none"><figcaption>Suivi d'une voiture à à-coups en ligne droite (agents RL) : démarrages secs, freinages, marche arrière. (animation)</figcaption></figure>
+<figure class="print-only t"><img src="figures/vignette_01_suivi_ligne_droite.png" alt="Vignette 01_suivi_ligne_droite" style="max-height:none"><figcaption>Suivi d'une voiture à à-coups en ligne droite (agents RL) : démarrages secs, freinages, marche arrière. Vignette de l'animation <code>rapport/presentation/01_suivi_ligne_droite.gif</code>.</figcaption></figure>
+<figure class="screen-only"><img src="presentation/02_suivi_slalom.gif" alt="02_suivi_slalom" style="max-height:none"><figcaption>Suivi d'un slalom serré et d'un demi-tour (agents RL). (animation)</figcaption></figure>
+<figure class="print-only t"><img src="figures/vignette_02_suivi_slalom.png" alt="Vignette 02_suivi_slalom" style="max-height:none"><figcaption>Suivi d'un slalom serré et d'un demi-tour (agents RL). Vignette de l'animation <code>rapport/presentation/02_suivi_slalom.gif</code>.</figcaption></figure>
+<h3>24.2 Duel des trois familles</h3>
+<p>Les trois familles suivent la même voiture avec le même bruit (<i>g</i> = 0,1), en trois vues côte à côte avec les courbes d'écart superposées.</p>
+<table>
+<caption>Écart drone–voiture pendant les duels (RMS / maximum).</caption>
+<thead><tr><th>Conduite</th><th>Agents RL</th><th>LQ sur ARX</th><th>LQI double intégrateur (réajusté)</th></tr></thead>
+<tbody>
+<tr class="em"><td>Ligne droite à à-coups</td><td>12,1 cm / 31 cm</td><td>15,1 cm / 42 cm</td><td>16,3 cm / 41 cm</td></tr>
+<tr class="em"><td>Slalom et demi-tour</td><td>5,4 cm / 21 cm</td><td>6,3 cm / 21,5 cm</td><td>8,9 cm / 29 cm</td></tr>
+</tbody></table>
+<p>L'agent est le plus précis dans les deux conduites ; le LQI double intégrateur, conçu sans modèle des moteurs, est celui qui oscille le plus.</p>
+<figure class="screen-only"><img src="presentation/03_duel_ligne_droite.gif" alt="03_duel_ligne_droite" style="max-height:none"><figcaption>Duel des trois familles sur la voiture à à-coups. (animation)</figcaption></figure>
+<figure class="print-only t"><img src="figures/vignette_03_duel_ligne_droite.png" alt="Vignette 03_duel_ligne_droite" style="max-height:none"><figcaption>Duel des trois familles sur la voiture à à-coups. Vignette de l'animation <code>rapport/presentation/03_duel_ligne_droite.gif</code>.</figcaption></figure>
+<figure class="screen-only"><img src="presentation/04_duel_slalom.gif" alt="04_duel_slalom" style="max-height:none"><figcaption>Duel des trois familles dans le slalom. (animation)</figcaption></figure>
+<figure class="print-only t"><img src="figures/vignette_04_duel_slalom.png" alt="Vignette 04_duel_slalom" style="max-height:none"><figcaption>Duel des trois familles dans le slalom. Vignette de l'animation <code>rapport/presentation/04_duel_slalom.gif</code>.</figcaption></figure>
+<figure class="m"><img src="presentation/05_duel_bilan.png" alt="Bilan des duels"><figcaption>Écarts RMS et maximaux des duels pour les trois familles.</figcaption></figure>
+
+<h3>24.3 Où et quand le drone se pose</h3>
+<p>La mission complète est refaite sur 13 voitures (la nominale et 12 aléatoires, graines 100 à 111) pour les trois familles : <strong>39 posés sur 39, tous à moins de 5 cm du centre</strong>.</p>
+<table>
+<caption>Mission finale sur 13 voitures et trois familles (<i>g</i> = 0,1).</caption>
+<thead><tr><th>Famille</th><th>Posés</th><th>Écart moyen au centre</th><th>Écart max</th><th>Instant moyen du posé</th></tr></thead>
+<tbody>
+<tr class="em"><td>Agents RL</td><td>13/13</td><td>1,4 cm</td><td>3,7 cm</td><td>30,0 s</td></tr>
+<tr><td>LQ sur ARX</td><td>13/13</td><td>1,4 cm</td><td>4,6 cm</td><td>32,7 s</td></tr>
+<tr><td>LQI double intégrateur (réajusté)</td><td>13/13</td><td>0,8 cm</td><td>1,9 cm</td><td>42,5 s</td></tr>
+</tbody></table>
+<p>Lecture honnête : le LQI double intégrateur est le plus précis au posé, mais le plus lent (12 s de plus que l'agent) ; l'agent est le plus rapide.</p>
+<figure class="t"><img src="presentation/06_cible_atterrissage.png" alt="Points de posé"><figcaption>Points de posé sur la plateforme (vue d'ensemble et zoom de 12 × 12 cm) et instant du posé, voiture par voiture, pour les trois familles.</figcaption></figure>
+
+<h3>24.4 Sous le capot et architecture</h3>
+<p>L'animation « sous le capot » montre un démarrage, un freinage et une marche arrière de l'agent : silhouettes vues de côté et de derrière (inclinaison dessinée ×2), poussée des quatre moteurs (M1 avant, M3 arrière, M2 gauche, M4 droite, déduits du mélangeur et des signes identifiés ; vérifié : corr(<i>u</i><sub>3</sub> − <i>u</i><sub>1</sub>, ω̇<sub>y</sub>) = +0,89), et θ demandé par l'agent contre θ obtenu. Pour accélérer, le drone se penche : le moteur arrière pousse plus pour basculer, puis le LQ contre-braque avant d'arriver à l'angle demandé, car les moteurs ont environ 3 pas de retard.</p>
+<figure class="screen-only"><img src="presentation/07_sous_le_capot.gif" alt="07_sous_le_capot" style="max-height:none"><figcaption>Sous le capot : inclinaison, poussée des quatre moteurs, θ demandé et θ obtenu. (animation)</figcaption></figure>
+<figure class="print-only t"><img src="figures/vignette_07_sous_le_capot.png" alt="Vignette 07_sous_le_capot" style="max-height:none"><figcaption>Sous le capot : inclinaison, poussée des quatre moteurs, θ demandé et θ obtenu. Vignette de l'animation <code>rapport/presentation/07_sous_le_capot.gif</code>.</figcaption></figure>
+<p>Le schéma-blocs ci-dessous résume le contrôleur de la mission finale : les six phases du superviseur avec leurs conditions de passage, puis la chaîne agents → LQ d'attitude → mélangeur → moteurs. Bleu : ce qui est appris ; vert : ce qui est modélisé ; jaune et gris : logique de mission et calcul fixe.</p>
+<figure class="t"><img src="presentation/08_architecture.png" alt="Architecture du contrôleur" style="max-height:none"><figcaption>Architecture du contrôleur de la mission finale, exécuté à 20 Hz sur Simulink comme en Python (version vectorielle : <code>rapport/presentation/08_architecture.svg</code>).</figcaption></figure>
+
+<h3>24.5 L'agent apprend</h3>
+<p>L'agent <i>z</i> a été réentraîné avec les mêmes réglages (graine 0, 2 millions de transitions, 7,3 min) pour enregistrer des étapes ; l'agent retenu n'est pas modifié. L'animation montre la mission de la Figure 1 volée à 8 moments de l'entraînement.</p>
+<table>
+<caption>Erreur RMS de l'agent <i>z</i> sur la mission de la Figure 1 au cours de l'entraînement.</caption>
+<thead><tr><th>Transitions</th><th>0 (chute)</th><th>20 000</th><th>60 000</th><th>150 000</th><th>300 000</th><th>au-delà</th></tr></thead>
+<tbody><tr><td>Erreur RMS</td><td>297 cm</td><td>251 cm</td><td>22,5 cm</td><td>4,7 cm</td><td>2,9 cm</td><td>≈ 3 à 3,7 cm</td></tr></tbody></table>
+<p>Avant l'entraînement, le drone tombe (<i>u</i> ≈ 0,39 ± bruit). Après 60 000 transitions il oscille encore ; dès 150 000 (environ 30 s de calcul) il suit la consigne à 5 cm près ; la suite ne fait qu'affiner.</p>
+<figure class="screen-only"><img src="presentation/09_agent_apprend.gif" alt="09_agent_apprend" style="max-height:none"><figcaption>La mission de la Figure 1 volée par l'agent <i>z</i> à huit moments de son entraînement (accéléré ×3,3), avec la courbe d'apprentissage. (animation)</figcaption></figure>
+<figure class="print-only t"><img src="figures/vignette_09_agent_apprend.png" alt="Vignette 09_agent_apprend" style="max-height:none"><figcaption>La mission de la Figure 1 volée par l'agent <i>z</i> à huit moments de son entraînement (accéléré ×3,3), avec la courbe d'apprentissage. Vignette de l'animation <code>rapport/presentation/09_agent_apprend.gif</code>.</figcaption></figure>
+<figure class="m"><img src="presentation/09_agent_apprend.png" alt="Courbe d'apprentissage"><figcaption>Vols de l'agent <i>z</i> aux étapes de l'entraînement et courbe d'apprentissage (version fixe).</figcaption></figure>
+<p>Les scripts qui refont ces images : <code>python/presentation/suivi_voiture.py</code> (01 à 05, ≈ 8 min), <code>cible_atterrissage.py</code> (06), <code>sous_le_capot.py</code> (07), <code>architecture.py</code> (08) et <code>agent_apprend.py</code> (09). L'animation de la mission complète sur Simulink reste <code>python/resultats/mission/animation_mission.gif</code> (section 19.7).</p>
+
+</body>
+</html>

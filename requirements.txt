@@ -1,0 +1,14 @@
+# Commande d'un quadrirotor par apprentissage par renforcement — environnement Python
+# Installation :  python -m venv .venv  puis  .venv\Scripts\pip install -r requirements.txt   (Python 3.12)
+# Versions avec lesquelles tout le dossier a été produit et vérifié :
+numpy==2.5.4
+scipy==1.18.1
+matplotlib==3.11.2
+pandas==3.0.6
+pillow==12.3.0               # animation GIF (python/evaluation/animation_mission.py)
+torch==2.6.0                 # identification des GRU (z, lacet) ; version CUDA 12.4 utilisée : torch==2.6.0+cu124
+gymnasium==1.2.3
+stable-baselines3==2.7.1     # PPO, SAC
+tensorboard==2.21.0          # courbes d'entraînement (facultatif)
+# MATLAB R2025b + Simulink (Control System Toolbox pour dlqr / c2d) pour les dossiers commande_LQ/, simulink_RL/,
+# generation_donnees/ et les fichiers fournis (Matlab files/, rl_interface/).

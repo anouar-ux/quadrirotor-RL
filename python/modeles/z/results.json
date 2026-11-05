@@ -1,0 +1,69 @@
+{
+  "config": {
+    "cell": "GRU",
+    "hidden": 64,
+    "layers": 1,
+    "epochs": 150,
+    "batch": 32,
+    "lr": 0.003,
+    "weight_decay": 1e-06,
+    "clip": 1.0,
+    "patience": 25,
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "split": [
+      0.7,
+      0.15,
+      0.15
+    ],
+    "split_seed": 0
+  },
+  "chosen": {
+    "seed": 2,
+    "best_val_rmse": 0.0450914241373539,
+    "best_epoch": 145,
+    "epochs_run": 150,
+    "train_time_s": 74.6
+  },
+  "all_runs": [
+    {
+      "seed": 0,
+      "best_val_rmse": 0.04515833407640457,
+      "best_epoch": 143,
+      "epochs_run": 150,
+      "train_time_s": 73.7
+    },
+    {
+      "seed": 1,
+      "best_val_rmse": 0.045253507792949677,
+      "best_epoch": 150,
+      "epochs_run": 150,
+      "train_time_s": 74.0
+    },
+    {
+      "seed": 2,
+      "best_val_rmse": 0.0450914241373539,
+      "best_epoch": 145,
+      "epochs_run": 150,
+      "train_time_s": 74.6
+    }
+  ],
+  "test": {
+    "ours": {
+      "rmse": 0.045019250363111496,
+      "bias": -0.000146371268783696,
+      "z_drift_start": 0.20712849497795105,
+      "z_drift_anywhere": 0.19744670391082764
+    },
+    "teammate_v3": {
+      "rmse": 0.0906255502334883,
+      "bias": -0.008166069902781575,
+      "z_drift_start": 1.134644946333244,
+      "z_drift_anywhere": 0.8675611462159868
+    }
+  },
+  "u_eq": 0.3900000000000001
+}

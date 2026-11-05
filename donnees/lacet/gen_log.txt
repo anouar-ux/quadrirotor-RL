@@ -1,0 +1,17 @@
+essai   1 / 150  (amp 0.008, |wz| max 1.25 rad/s, z dans [0.485, 0.590])  9 s
+essai  10 / 150  (amp 0.025, |wz| max 3.96 rad/s, z dans [0.485, 0.592])  14 s
+essai  20 / 150  (amp 0.025, |wz| max 3.40 rad/s, z dans [0.487, 0.598])  19 s
+essai  30 / 150  (amp 0.020, |wz| max 3.15 rad/s, z dans [0.485, 0.594])  23 s
+essai  40 / 150  (amp 0.021, |wz| max 3.20 rad/s, z dans [0.484, 0.588])  27 s
+essai  50 / 150  (amp 0.014, |wz| max 2.05 rad/s, z dans [0.485, 0.588])  31 s
+essai  60 / 150  (amp 0.020, |wz| max 2.76 rad/s, z dans [0.483, 0.590])  35 s
+essai  70 / 150  (amp 0.026, |wz| max 3.86 rad/s, z dans [0.484, 0.592])  39 s
+essai  80 / 150  (amp 0.017, |wz| max 2.43 rad/s, z dans [0.484, 0.599])  43 s
+essai  90 / 150  (amp 0.021, |wz| max 2.79 rad/s, z dans [0.486, 0.590])  47 s
+essai 100 / 150  (amp 0.003, |wz| max 0.52 rad/s, z dans [0.480, 0.597])  51 s
+essai 110 / 150  (amp 0.018, |wz| max 2.78 rad/s, z dans [0.484, 0.593])  56 s
+essai 120 / 150  (amp 0.021, |wz| max 3.29 rad/s, z dans [0.487, 0.589])  60 s
+essai 130 / 150  (amp 0.006, |wz| max 0.98 rad/s, z dans [0.485, 0.598])  64 s
+essai 140 / 150  (amp 0.007, |wz| max 0.97 rad/s, z dans [0.485, 0.586])  68 s
+essai 150 / 150  (amp 0.004, |wz| max 0.59 rad/s, z dans [0.485, 0.592])  72 s
+donnees_lacet.mat ‚crit : 150 essais x 1200 pas, 72 s

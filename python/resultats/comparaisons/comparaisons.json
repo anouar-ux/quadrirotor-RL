@@ -1,0 +1,252 @@
+{
+  "z": {
+    "LQI double intégrateur (gains réajustés à 20 Hz)": {
+      "echelon": {
+        "montee_s": 0.8500000000000001,
+        "depassement_pct": 24.895756732607687,
+        "temps_reponse_2pct_s": 6.5,
+        "erreur_finale": 0.0004744447223797299,
+        "agitation_u_bruit": 0.04425920438092089
+      },
+      "figure1_rmse_m": 0.11715348602399521,
+      "figure1_rmse_bruit_m": 0.11727843854587135,
+      "prbs_bruit": {
+        "rmse_m": 0.08292801900431715,
+        "bande_passante_hz": 0.46875,
+        "bande_superieure_a_hz": null,
+        "agitation": 0.01900285541934621
+      }
+    },
+    "LQI sur modèle ARX": {
+      "echelon": {
+        "montee_s": 0.65,
+        "depassement_pct": 9.957910185060136,
+        "temps_reponse_2pct_s": 4.3,
+        "erreur_finale": 6.997015003251672e-05,
+        "agitation_u_bruit": 0.135466608803431
+      },
+      "figure1_rmse_m": 0.05975362149455435,
+      "figure1_rmse_bruit_m": 0.05949762604254721,
+      "prbs_bruit": {
+        "rmse_m": 0.05557530937315925,
+        "bande_passante_hz": 1.25,
+        "bande_superieure_a_hz": null,
+        "agitation": 0.1367169531581883
+      }
+    },
+    "agent PPO z": {
+      "echelon": {
+        "montee_s": 0.8500000000000001,
+        "depassement_pct": 0.17344837433628246,
+        "temps_reponse_2pct_s": 2.0,
+        "erreur_finale": 0.0007968896683677729,
+        "agitation_u_bruit": 0.029675905279178714
+      },
+      "figure1_rmse_m": 0.030818691852457992,
+      "figure1_rmse_bruit_m": 0.030838360371445925,
+      "prbs_bruit": {
+        "rmse_m": 0.026786648375069777,
+        "bande_passante_hz": 2.34375,
+        "bande_superieure_a_hz": null,
+        "agitation": 0.03621073056294763
+      }
+    }
+  },
+  "psi": {
+    "LQI double intégrateur (gains réajustés à 20 Hz)": {
+      "scan": {
+        "rmse_rad": 0.13342648836699492,
+        "erreur_max_rad": 0.2761755175680225,
+        "erreur_pendant_scan_deg": 9.763870342988968,
+        "depassement_fin_deg": 15.01677262038937
+      },
+      "scan_bruit": {
+        "rmse_rad": 0.1332933879193017,
+        "erreur_max_rad": 0.27599393894249846,
+        "erreur_pendant_scan_deg": 9.747102794927883,
+        "depassement_fin_deg": 15.090800743362125
+      },
+      "prbs_bruit": {
+        "rmse_rad": 0.13879811873388093,
+        "bande_passante_vitesse_hz": 0.546875,
+        "bande_superieure_a_hz": null
+      }
+    },
+    "LQ sur modèle ARX": {
+      "scan": {
+        "rmse_rad": 0.015922549290794178,
+        "erreur_max_rad": 0.059018698464070596,
+        "erreur_pendant_scan_deg": 0.6548558184974252,
+        "depassement_fin_deg": 0.026674444956166832
+      },
+      "scan_bruit": {
+        "rmse_rad": 0.015890938685466927,
+        "erreur_max_rad": 0.05925163998899077,
+        "erreur_pendant_scan_deg": 0.6535368259830717,
+        "depassement_fin_deg": 0.1624339525271387
+      },
+      "prbs_bruit": {
+        "rmse_rad": 0.04401295844967683,
+        "bande_passante_vitesse_hz": NaN,
+        "bande_superieure_a_hz": 1.640625
+      }
+    },
+    "agent PPO lacet": {
+      "scan": {
+        "rmse_rad": 0.0116343383263316,
+        "erreur_max_rad": 0.046375895416441715,
+        "erreur_pendant_scan_deg": 0.38552784235280046,
+        "depassement_fin_deg": 0.06299020078975268
+      },
+      "scan_bruit": {
+        "rmse_rad": 0.011701914543968754,
+        "erreur_max_rad": 0.04748303414677757,
+        "erreur_pendant_scan_deg": 0.3886488019396288,
+        "depassement_fin_deg": 0.22171016295959153
+      },
+      "prbs_bruit": {
+        "rmse_rad": 0.03268240922512836,
+        "bande_passante_vitesse_hz": NaN,
+        "bande_superieure_a_hz": 1.640625
+      }
+    }
+  },
+  "attitude": {
+    "LQI double intégrateur (gains réajustés à 20 Hz)": {
+      "montee_s": 0.25,
+      "depassement_pct": 32.04793023538524,
+      "temps_reponse_2pct_s": null,
+      "erreur_finale": 0.0009547000095259939,
+      "diverge": false
+    },
+    "LQ sur ARX, réglage C1 (lent)": {
+      "montee_s": 0.8500000000000001,
+      "depassement_pct": 0.3626326040403749,
+      "temps_reponse_2pct_s": 1.4500000000000002,
+      "erreur_finale": 8.73552065405736e-09,
+      "diverge": false
+    },
+    "LQ sur ARX, réglage rapide (boucle interne)": {
+      "montee_s": 0.30000000000000004,
+      "depassement_pct": 2.7572979816182506,
+      "temps_reponse_2pct_s": 0.8,
+      "erreur_finale": 2.6201263381153694e-14,
+      "diverge": false
+    }
+  },
+  "x": {
+    "cascade LQI : PD 0,23/0,28 + LQI θ réajusté": {
+      "saut_2m": {
+        "montee_s": 3.9000000000000004,
+        "depassement_pct": 0.024101669090237365,
+        "temps_reponse_2pct_s": 7.500000000000001,
+        "erreur_finale": 0.00010754332046669646,
+        "rmse_bruit_m": 0.24093674806618898
+      },
+      "saut_5m": {
+        "montee_s": 3.9000000000000004,
+        "depassement_pct": 0.024101669090228484,
+        "temps_reponse_2pct_s": 7.500000000000001,
+        "erreur_finale": 0.0002688583011654089,
+        "rmse_bruit_m": 0.6037235228258271
+      },
+      "voiture": {
+        "depassement_voiture_m": 0.0,
+        "retard_suivi_m": 0.36426186592901083,
+        "rmse_bruit_m": 0.8148717319250068
+      },
+      "prbs_bruit": {
+        "rmse_m": 0.2637112761171274,
+        "bande_passante_hz": 0.3125,
+        "bande_superieure_a_hz": null
+      }
+    },
+    "PD réglé sur l'ARX : 0,3/0,45 + anticipation": {
+      "saut_2m": {
+        "montee_s": 2.9000000000000004,
+        "depassement_pct": 0.426841948780865,
+        "temps_reponse_2pct_s": 5.4,
+        "erreur_finale": 5.866579383484449e-05,
+        "rmse_bruit_m": 0.04359323650019277
+      },
+      "saut_5m": {
+        "montee_s": 2.7,
+        "depassement_pct": 0.20331060306254756,
+        "temps_reponse_2pct_s": 5.25,
+        "erreur_finale": 0.00010359931747849771,
+        "rmse_bruit_m": 0.2155993025439638
+      },
+      "voiture": {
+        "depassement_voiture_m": 0.09768398926625732,
+        "retard_suivi_m": 0.0010478474752140588,
+        "rmse_bruit_m": 0.28330523086711207
+      },
+      "prbs_bruit": {
+        "rmse_m": 0.07269987950060659,
+        "bande_passante_hz": 1.171875,
+        "bande_superieure_a_hz": null
+      }
+    },
+    "agent PPO x (entraîné aux saturations)": {
+      "saut_2m": {
+        "montee_s": 2.95,
+        "depassement_pct": 0.1481809988381544,
+        "temps_reponse_2pct_s": 5.3,
+        "erreur_finale": 0.00022653600366817628,
+        "rmse_bruit_m": 0.03503316696576566
+      },
+      "saut_5m": {
+        "montee_s": 2.8000000000000003,
+        "depassement_pct": 0.0,
+        "temps_reponse_2pct_s": 5.6000000000000005,
+        "erreur_finale": 0.0001414157238581737,
+        "rmse_bruit_m": 0.21643779641870142
+      },
+      "voiture": {
+        "depassement_voiture_m": 0.01746134553826373,
+        "retard_suivi_m": 0.001969415210616776,
+        "rmse_bruit_m": 0.28637143677609656
+      },
+      "prbs_bruit": {
+        "rmse_m": 0.060033929511376385,
+        "bande_passante_hz": 1.484375,
+        "bande_superieure_a_hz": null
+      }
+    }
+  },
+  "mission": {
+    "LQ (Simulink, mission_LQ.slx)": {
+      "g=0": {
+        "t_pose_s": 40.95,
+        "ecart_contact_m": 0.008681560786255815,
+        "vitesse_relative_ms": 0.0026020503480605472
+      },
+      "g=0.01": {
+        "t_pose_s": 40.95,
+        "ecart_contact_m": 0.008091121169071513,
+        "vitesse_relative_ms": 0.0008411274650458322
+      },
+      "g=0.1": {
+        "t_pose_s": 41.1,
+        "ecart_contact_m": 0.008940655969789546,
+        "vitesse_relative_ms": 0.009341963371726658
+      }
+    },
+    "RL (agents, simulateur assemblé)": {
+      "g=0": {
+        "t_posé": 29.650000000000002,
+        "ecart_contact_m": 0.0014336382578098751,
+        "derive_scan_m": 0.0,
+        "erreur_z_vol_m": 0.0015936885542998658,
+        "vitesse_relative_horiz_ms": 0.0007577613568346127
+      },
+      "g=0,1": {
+        "t_posé": 29.700000000000003,
+        "ecart_contact_m": 0.0015924684193684314,
+        "derive_scan_m": 0.006499568830616864,
+        "erreur_z_vol_m": 0.005554489469772661,
+        "vitesse_relative_horiz_ms": 0.010410066807409525
+      }
+    }
+  }
+}

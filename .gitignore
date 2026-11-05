@@ -1,0 +1,23 @@
+# --- caches MATLAB / Simulink (régénérés automatiquement)
+slprj/
+*.slxc
+*.asv
+*.autosave
+# --- caches Python
+__pycache__/
+.ipynb_checkpoints/
+.venv/
+.pytest_cache/
+# --- données lourdes : seules les versions compressées sont publiées
+#     (donnees/brutes/*.csv : fournies par le sujet, ~50 Mo chacune ; donnees/nettoyees/*.csv : décompresser les .csv.gz)
+donnees/brutes/*.csv
+donnees/nettoyees/*.csv
+# --- hors dépôt : dépôt du groupe (cloné à part), archives du rangement et sauvegardes
+depot_groupe/
+archives/
+# --- système
+.DS_Store
+Thumbs.db
+desktop.ini
+# --- doublon local du GIF de la mission (nommé .png par erreur ; l'original est python/resultats/mission/animation_mission.gif)
+rapport/video poursuite.png
