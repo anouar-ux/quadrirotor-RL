@@ -31,8 +31,10 @@ from chemins import RESULTATS  # noqa: E402
 from env_z import MISSION_FIG1, TS, DroneEnv, mission  # noqa: E402
 
 DOSSIER = RESULTATS / "agent_z_ppo_apprentissage"
-ETAPES = (0, 20_000, 60_000, 150_000, 300_000, 600_000, 1_200_000, 2_000_000)
-PAS_TOTAL, EVAL_TOUS = 2_000_000, 50_000
+# étapes resserrées là où l'agent apprend (entre 40 000 et 100 000 transitions)
+ETAPES = (0, 8_000, 16_000, 24_000, 32_000, 40_000, 48_000, 56_000, 64_000, 72_000, 80_000, 88_000, 96_000,
+          112_000, 128_000, 160_000, 240_000, 400_000, 800_000, 2_000_000)
+PAS_TOTAL, EVAL_TOUS = 2_000_000, 8_000
 N_VOL = 200                      # 10 s de mission
 
 
