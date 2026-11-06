@@ -24,16 +24,18 @@ Le superviseur, le mélangeur et l'anticipation de poussée 1/cos sont communs a
 | `03_duel_ligne_droite.gif`, `04_duel_slalom.gif` | Les trois familles sur la même voiture et avec le même bruit, en trois vues côte à côte. Courbes d'écart superposées et RMS en direct. | Le RL est le plus précis dans les deux conduites. Le LQI « double intégrateur », conçu sans modèle des moteurs, oscille le plus. |
 | `05_duel_bilan.png` | Écarts RMS et maximaux des duels. | Ligne droite, RMS : 12,1 (RL), 15,1 (ARX), 16,3 cm (LQI). Slalom : 5,4 / 6,3 / 8,9 cm. |
 | `06_cible_atterrissage.png` | Mission complète sur 13 voitures (nominale et 12 aléatoires) pour les 3 familles. Points de posé sur la plateforme, avec un zoom, et instant du posé. | 39 posés sur 39, tous à moins de 5 cm du centre. Le RL se pose en 30 s en moyenne, contre 33 s (ARX) et 42,5 s (LQI). Le LQI est le plus précis (0,8 cm) mais le plus lent. |
+| `06b_cible_atterrissage_rapide.png` (figure en anglais) | Même mission sur 100 voitures aléatoires plus rapides (0,5 à 1,0 m/s au lieu de 0,25 à 0,7 m/s, graines 1000 à 1099), pour les 3 familles : taux de réussite, points de posé, instant du posé. | 300 posés sur 300 en moins de 60 s ; sur la plateforme : 100 % (RL), 99 % (ARX), 100 % (LQI). À moins de 5 cm : 98 / 92 / 100 %. Écart moyen 1,5 / 1,9 / 0,6 cm, posé en 32,6 / 36,0 / 45,6 s en moyenne. Le LQI reste le plus précis et le plus lent. |
 | `07_sous_le_capot.gif` | Démarrage, frein et marche arrière (RL) : silhouettes vues de côté et de derrière (inclinaison ×2), poussée des 4 moteurs, θ demandé par l'agent et θ obtenu. | Pour accélérer, le drone se penche. Le moteur arrière pousse plus pour basculer, puis le LQ contre-braque avant d'arriver à l'angle demandé, car les moteurs ont environ 3 pas de retard. |
 | `08_architecture.png` (`.svg`) | Schéma-blocs : 6 phases du superviseur et leurs conditions, puis la chaîne agents → LQ d'attitude → mélangeur → moteurs. | Ce qui est appris (bleu), ce qui est modélisé (vert), ce qui est logique ou géométrie. |
 | `09_agent_apprend.gif`, `09_agent_apprend.png` | La mission de la Figure 1 volée par l'agent z à 20 moments de son entraînement (accéléré ×3,3), avec la courbe d'apprentissage (évaluée toutes les 8 000 transitions). | Jusqu'à 40 000 transitions, le drone tombe ou s'envole. Tout se joue entre 48 000 et 100 000 : l'erreur RMS sur la mission passe de 161 cm à 16 cm (64 000), puis 7 cm (96 000). À 400 000 elle vaut 3 cm ; la suite (jusqu'à 2 millions) ne fait qu'affiner. |
-| `suivi_voiture.json`, `cible_atterrissage.json` | Indicateurs chiffrés. | |
+| `suivi_voiture.json`, `cible_atterrissage.json`, `cible_atterrissage_rapide.json` | Indicateurs chiffrés. | |
 
 ## Refaire les images
 
 ```bash
 python python/presentation/suivi_voiture.py          # 01 à 05 (≈ 8 min ; --rapide : une image sur 4)
 python python/presentation/cible_atterrissage.py     # 06 (≈ 3 min ; --figure : redessine depuis le .json)
+python python/presentation/cible_atterrissage_rapide.py   # 06b (≈ 2 min ; --figure : redessine depuis le .json)
 python python/presentation/sous_le_capot.py          # 07 (1 min)
 python python/presentation/architecture.py           # 08
 python python/presentation/agent_apprend.py          # 09 (réentraîne z la 1re fois, dans resultats/agent_z_ppo_apprentissage/)
