@@ -15,6 +15,14 @@ Les **trois familles** de contrôleurs comparées, sur tous les axes (`python/pr
 
 Le superviseur, le mélangeur et l'anticipation de poussée 1/cos sont communs aux trois familles.
 
+## Diaporama de la soutenance
+
+`presentation_finale.pptx` : la présentation finale en anglais, soit 18 slides (environ 11 min) et 3 slides de réserve (B1 à B3). Les notes d'orateur de chaque slide (minutage et chiffres à citer) sont dans les notes PowerPoint.
+
+- **Modifiable** : chaque titre, texte, encadré et figure est un objet PowerPoint distinct. Les figures sont des images, qu'on remplace par clic droit puis « Changer l'image ».
+- **Lisible partout** : le diaporama n'utilise que Arial et Georgia, présentes sous Windows, macOS et Google Slides. Il n'y a donc pas de substitution de police chez la personne qui l'ouvre.
+- **Animations** : les 6 animations (slides 1, 8, 12, 13, 15 et 16) sont des GIF intégrés au fichier. Elles se lancent seules en mode diaporama dans PowerPoint, Keynote, Google Slides et LibreOffice, sans fichier externe. Elles sont compressées sans perte visible avec `gifsicle -O3 --lossy=35`, avec les mêmes images et la même cadence. Le fichier pèse ainsi 21 Mo, sous la limite de 25 Mo d'une pièce jointe Gmail.
+
 ## Fichiers
 
 | fichier | ce qu'on y voit | message pour l'oral |
