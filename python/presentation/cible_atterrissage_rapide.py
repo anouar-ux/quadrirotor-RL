@@ -4,8 +4,12 @@ CIBLE D'ATTERRISSAGE, VOITURES PLUS RAPIDES : taux de réussite de la mission fi
 Même mission et même superviseur que cible_atterrissage.py (sim_mission.py), mêmes trois familles de contrôleurs
 (presentation/commun.py), mesures bruitées (g_noise = 0,1), mais :
   - 100 voitures tirées au hasard (graines 1000 à 1099) au lieu de 13, pour donner un pourcentage de réussite ;
-  - vitesses de 0,5 à 1,0 m/s au lieu de 0,25 à 0,7 m/s (même générateur que voiture.voiture_aleatoire, seules les
-    plages de vitesse changent). 1 m/s reste dans le domaine d'entraînement de l'agent x (cibles jusqu'à 1 m/s).
+  - vitesses de 0,5 à 1,0 m/s au lieu de 0,25 à 0,7 m/s. 1 m/s reste dans le domaine d'entraînement de l'agent x
+    (cibles jusqu'à 1 m/s) ;
+  - trajets aléatoires SUR TOUTE LA DURÉE (voiture_continue) : avec voiture.voiture_aleatoire, toutes les manœuvres
+    ont lieu avant ~40 s, si bien qu'un contrôleur lent se posait sur une voiture redevenue calme, ce qui le rendait
+    artificiellement plus précis. Ici, la vitesse et la courbure changent à des instants aléatoires jusqu'à la fin :
+    l'état de la voiture au moment du posé ne dépend plus de la famille.
 Un vol réussit s'il se pose (z < 2 cm au-dessus de la plateforme, superviseur en phase 5) en moins de 60 s ; on
 indique aussi s'il se pose sur la plateforme (20 x 16 cm) et à moins de 5 cm / 2 cm du centre.
 
@@ -33,23 +37,28 @@ MARQ = {"RL": "o", "ARX": "s", "LQI": "^"}
 NOMS_EN = {"RL": "RL agents (PPO)", "ARX": "LQ(I) on ARX model", "LQI": "double-integrator LQI"}
 
 
-def voiture_rapide(rng):
-    """voiture.voiture_aleatoire avec des vitesses de V_MIN à V_MAX (premier palier : V_MIN à 0,9 m/s)."""
-    tv = np.sort(rng.uniform(0, 30, 4)); tk = np.sort(rng.uniform(6, 36, 4))
-    vit = tuple((float(tv[i]), float(rng.uniform(2, 4)), float(rng.uniform(V_MIN, V_MAX))) for i in range(4))
-    vit = ((0.0, float(rng.uniform(2, 4)), float(rng.uniform(V_MIN, 0.9))),) + vit[1:]
-    cour = []
-    for i in (0, 2):
-        cour += [(float(tk[i]), 1.5, float(rng.choice([-1, 1]) * rng.uniform(1 / 8, 1 / 2.5))),
-                 (float(max(tk[i + 1], tk[i] + 2)), 1.5, 0.0)]
+def voiture_continue(rng, duree=T_FIN + 5):
+    """Trajet aléatoire jusqu'à la fin du vol (même format que voiture.py : transitions en S successives).
+    Vitesse : paliers tirés dans [V_MIN ; V_MAX], tenus 1 à 3 s, transitions de 1,5 à 3 s (|a_long| <= 1,5·0,5/1,5
+    = 0,5 m/s², 0,68 m/s² au démarrage ; sous les ~2 m/s² que permet θmax). Courbure : un virage (rayon 2,5 à 8 m, à gauche ou à droite) ou une
+    ligne droite (1 fois sur 3), changée toutes les 3,5 à 6,5 s (|a_lat| <= 1²/2,5 = 0,4 m/s²)."""
+    d = float(rng.uniform(2, 3))
+    vit, t = [(0.0, d, float(rng.uniform(V_MIN, 0.9)))], d
+    while t < duree:
+        t += float(rng.uniform(1, 3)); d = float(rng.uniform(1.5, 3))
+        vit.append((t, d, float(rng.uniform(V_MIN, V_MAX)))); t += d
+    cour, t = [], float(rng.uniform(1, 4))
+    while t < duree:
+        k = 0.0 if rng.uniform() < 1 / 3 else float(rng.choice([-1, 1]) * rng.uniform(1 / 8, 1 / 2.5))
+        cour.append((t, 1.5, k)); t += 1.5 + float(rng.uniform(2, 5))
     return dict(t_depart=float(rng.uniform(2, 6)), x0=float(rng.uniform(0.5, 2.5)), y0=float(rng.uniform(-1.5, 1.5)),
-                cap0=float(rng.uniform(-np.pi, np.pi)), vitesse=vit, courbure=tuple(cour))
+                cap0=float(rng.uniform(-np.pi, np.pi)), vitesse=tuple(vit), courbure=tuple(cour))
 
 
 def main():
     res, voit = {f: [] for f in C.FAMILLES}, []
     for g in range(GRAINE0, GRAINE0 + N):
-        T = C.table_voiture(voiture_rapide(np.random.default_rng(g)), T_FIN + 1)
+        T = C.table_voiture(voiture_continue(np.random.default_rng(g)), T_FIN + 1)
         voit.append(dict(graine=g, v_max_ms=float(T["v"].max()), a_lat_max=float(np.abs(T["a_lat"]).max()),
                          a_long_max=float(np.abs(T["a_long"]).max())))
         for f in C.FAMILLES:
@@ -59,7 +68,10 @@ def main():
             if d:
                 i = int(np.argmax(ph >= 5))
                 vv = R["voiture"]["v"][i] * np.array([np.cos(R["voiture"]["cap"][i]), np.sin(R["voiture"]["cap"][i])])
-                e.update(d, v_rel_cms=float(100 * np.hypot(*(R["vrai"][i, 3:5] - vv))))
+                # la voiture manœuvrait-elle juste avant le posé ? (accélération max sur les 3 s précédentes)
+                w = slice(max(i - 60, 0), i + 1)
+                e.update(d, v_rel_cms=float(100 * np.hypot(*(R["vrai"][i, 3:5] - vv))),
+                         a_voiture_3s=float(np.max(np.hypot(R["voiture"]["a_long"][w], R["voiture"]["a_lat"][w]))))
             # instant d'entrée dans chaque phase (0 stabilisation ... 5 posé)
             e["debuts_phases_s"] = [float(R["t"][np.argmax(ph >= k)]) if (ph >= k).any() else None for k in range(6)]
             res[f].append(e)
@@ -83,7 +95,10 @@ def bilan(res):
                     ecart_moyen_cm=float(ec.mean()), ecart_median_cm=float(np.median(ec)), ecart_max_cm=float(ec.max()),
                     t_pose_moyen_s=float(tp.mean()), t_pose_min_s=float(tp.min()), t_pose_max_s=float(tp.max()),
                     v_rel_moyenne_cms=float(np.mean([d["v_rel_cms"] for d in P])),
-                    v_rel_max_cms=float(np.max([d["v_rel_cms"] for d in P])))
+                    v_rel_max_cms=float(np.max([d["v_rel_cms"] for d in P])),
+                    poses_en_manoeuvre=int(sum(d["a_voiture_3s"] > 0.01 for d in P)),
+                    ecart_type_avant_cm=float(100 * np.std([d["avant_m"] for d in P])),
+                    ecart_type_gauche_cm=float(100 * np.std([d["gauche_m"] for d in P])))
     return B
 
 
@@ -107,9 +122,9 @@ def figure(out=None):
         ax.scatter([100 * d["avant_m"] for d in P], [100 * d["gauche_m"] for d in P], marker=MARQ[f], s=26,
                    c=C.COUL[f], ec="w", lw=0.5, alpha=0.85, zorder=3,
                    label=f"{NOMS_EN[f]}: mean {B[f]['ecart_moyen_cm']:.1f} cm, max {B[f]['ecart_max_cm']:.1f} cm")
-    ax.set_xlim(-11, 13); ax.set_ylim(-9.5, 9.5); ax.set_aspect("equal")
-    ax.annotate("", xy=(12.6, 0), xytext=(10.6, 0), arrowprops=dict(arrowstyle="-|>", color="0.3", lw=1.4))
-    ax.text(11.6, 0.8, "car\nheading", fontsize=7, ha="center", color="0.3")
+    ax.set_xlim(-12, 14.5); ax.set_ylim(-11.5, 11.5); ax.set_aspect("equal")
+    ax.annotate("", xy=(14.1, 0), xytext=(12.1, 0), arrowprops=dict(arrowstyle="-|>", color="0.3", lw=1.4))
+    ax.text(13.1, 0.8, "car\nheading", fontsize=7, ha="center", color="0.3")
     ax.set_xlabel("forward [cm]"); ax.set_ylabel("left [cm]")
     ax.set_title("touchdown points on the platform (20 × 16 cm)", fontsize=10)
     ax.legend(loc="upper left", bbox_to_anchor=(0, 1.27), fontsize=8, frameon=False)
@@ -127,7 +142,7 @@ def figure(out=None):
             axb.plot(vi, yi, MARQ[f], color=C.COUL[f], ms=4.5, mec="w", mew=0.5)
     axb.set_yticks(y, [c for c, _ in crit], fontsize=9); axb.invert_yaxis()
     axb.set_xlim(0, 118); axb.set_xticks([0, 25, 50, 75, 100])
-    axb.set_xlabel(f"share of the {n} cars [%]"); axb.grid(axis="x", alpha=0.35)
+    axb.set_xlabel(f"share of the {n} cars [%] (not landed = failure)"); axb.grid(axis="x", alpha=0.35)
     axb.set_title("success rate", fontsize=10)
 
     # (c) instant du posé
@@ -138,12 +153,12 @@ def figure(out=None):
         axt.plot([tp.mean()] * 2, [k - 0.32, k + 0.32], color="0.15", lw=2)
         axt.text(tp.mean(), k - 0.36, f"mean {tp.mean():.1f} s", ha="center", va="bottom", fontsize=8, color="0.15")
     axt.set_yticks(range(3), [NOMS_EN[f] for f in C.FAMILLES], fontsize=8.5); axt.invert_yaxis()
-    axt.set_ylim(2.6, -0.75); axt.set_xlabel("touchdown time [s]"); axt.grid(axis="x", alpha=0.35)
+    axt.set_ylim(2.6, -0.75); axt.set_xlabel("touchdown time [s] (landed flights)"); axt.grid(axis="x", alpha=0.35)
     axt.set_title("when the drone lands", fontsize=10)
 
     p = out["parametres"]
-    fig.suptitle(f"Final mission on {n} random cars at {p['vitesse_ms'][0]}–{p['vitesse_ms'][1]} m/s, turns of radius "
-                 f"≥ 2.5 m, noisy measurements (g_noise = 0.1)", fontsize=12, y=0.985)
+    fig.suptitle(f"Final mission on {n} random cars that keep changing speed ({p['vitesse_ms'][0]}–{p['vitesse_ms'][1]} m/s) "
+                 f"and turning (radius ≥ 2.5 m) until the end, noisy measurements (g_noise = 0.1)", fontsize=11.5, y=0.985)
     fig.savefig(PNG, dpi=140); plt.close(fig)
     print(f"-> {PNG}")
 
